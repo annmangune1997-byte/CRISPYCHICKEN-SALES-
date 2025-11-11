@@ -1,0 +1,1574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crispy Chicken Advanced Sales Analytics</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+    <style>
+        :root {
+            --primary-color: #e53935;
+            --secondary-color: #ffb300;
+            --dark-color: #212121;
+            --light-color: #f5f5f5;
+            --success-color: #43a047;
+            --danger-color: #e53935;
+            --info-color: #1e88e5;
+            --warning-color: #fb8c00;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .dashboard-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .metric-card {
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: transform 0.3s;
+            border-left: 5px solid;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .metric-card.sales-2024 { border-left-color: var(--info-color); }
+        .metric-card.sales-2025 { border-left-color: var(--success-color); }
+        .metric-card.growth { border-left-color: var(--secondary-color); }
+        .metric-card.increase { border-left-color: var(--primary-color); }
+        .metric-card.avg-order { border-left-color: var(--warning-color); }
+        .metric-card.customers { border-left-color: var(--info-color); }
+        
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0.5rem 0;
+        }
+        
+        .insight-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .insight-item {
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .insight-item.best { background-color: rgba(67, 160, 71, 0.1); }
+        .insight-item.fastest { background-color: rgba(30, 136, 229, 0.1); }
+        .insight-item.lowest { background-color: rgba(229, 57, 53, 0.1); }
+        .insight-item.top { background-color: rgba(255, 179, 0, 0.1); }
+        .insight-item.recommendation { background-color: rgba(156, 39, 176, 0.1); }
+        
+        .chart-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            height: 400px;
+        }
+        
+        .data-entry {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .data-table {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            padding: 1.5rem;
+            overflow-x: auto;
+        }
+        
+        .table th {
+            background-color: var(--dark-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .table th:hover {
+            background-color: #424242;
+        }
+        
+        .table th i {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0.5;
+        }
+        
+        .table td {
+            vertical-align: middle;
+        }
+        
+        .growth-positive {
+            color: var(--success-color);
+            font-weight: 600;
+        }
+        
+        .growth-negative {
+            color: var(--danger-color);
+            font-weight: 600;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-primary:hover {
+            background-color: #c62828;
+            border-color: #c62828;
+        }
+        
+        .btn-success {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+        }
+        
+        .btn-success:hover {
+            background-color: #2e7d32;
+            border-color: #2e7d32;
+        }
+        
+        .form-control:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 0.25rem rgba(255, 179, 0, 0.25);
+        }
+        
+        .filter-section {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .performance-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            height: 100%;
+        }
+        
+        .performance-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+        }
+        
+        .performance-item.top {
+            background-color: rgba(67, 160, 71, 0.1);
+        }
+        
+        .performance-item.bottom {
+            background-color: rgba(229, 57, 53, 0.1);
+        }
+        
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 300px;
+        }
+        
+        .forecast-metrics {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 1rem;
+        }
+        
+        .forecast-metric {
+            text-align: center;
+        }
+        
+        .forecast-metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        .tab-content {
+            padding: 1rem 0;
+        }
+        
+        .nav-tabs .nav-link {
+            color: var(--dark-color);
+        }
+        
+        .nav-tabs .nav-link.active {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="mb-0"><i class="fas fa-chart-line me-3"></i>Crispy Chicken Sales Analytics</h1>
+                    <p class="mb-0 mt-2">Advanced Performance Dashboard</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="d-flex align-items-center justify-content-end">
+                        <div class="me-3">
+                            <small>Last Updated</small>
+                            <div id="lastUpdated" class="fw-bold">Just now</div>
+                        </div>
+                        <button class="btn btn-light" id="refreshBtn">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Summary Metrics -->
+        <div class="row mb-4">
+            <div class="col-md-2 mb-3">
+                <div class="metric-card sales-2024 p-3">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-muted">2024 Sales</h6>
+                            <div class="metric-value" id="total2024">36.08M</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-money-bill-wave fa-2x text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2 mb-3">
+                <div class="metric-card sales-2025 p-3">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-muted">2025 Sales</h6>
+                            <div class="metric-value" id="total2025">44.23M</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-money-bill-wave fa-2x text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2 mb-3">
+                <div class="metric-card growth p-3">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-muted">Growth</h6>
+                            <div class="metric-value" id="growth">+22.6%</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-chart-line fa-2x text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2 mb-3">
+                <div class="metric-card increase p-3">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-muted">Increase</h6>
+                            <div class="metric-value" id="increase">+8.15M</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-arrow-up fa-2x text-danger"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2 mb-3">
+                <div class="metric-card avg-order p-3">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-muted">Avg Order</h6>
+                            <div class="metric-value" id="avgOrder">85 AED</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-shopping-cart fa-2x text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2 mb-3">
+                <div class="metric-card customers p-3">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-muted">Customers</h6>
+                            <div class="metric-value" id="customers">520K</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-users fa-2x text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Insights -->
+        <div class="insight-card">
+            <h4 class="mb-3"><i class="fas fa-lightbulb text-warning me-2"></i>Key Insights</h4>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="insight-item best">
+                        <i class="fas fa-trophy text-success me-3 fa-lg"></i>
+                        <div>
+                            <strong>Best Performing Channel:</strong> Noon (↑47.7%)
+                        </div>
+                    </div>
+                    <div class="insight-item fastest">
+                        <i class="fas fa-rocket text-info me-3 fa-lg"></i>
+                        <div>
+                            <strong>Fastest-Growing Branch:</strong> Elctria (↑169.9%)
+                        </div>
+                    </div>
+                    <div class="insight-item lowest">
+                        <i class="fas fa-exclamation-triangle text-danger me-3 fa-lg"></i>
+                        <div>
+                            <strong>Lowest Performance:</strong> Deliveroo (↓15.8%)
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="insight-item top">
+                        <i class="fas fa-star text-warning me-3 fa-lg"></i>
+                        <div>
+                            <strong>Top Growth Channels:</strong> Careem (↑368%), Noon (↑47.7%), Keeta (↑100%)
+                        </div>
+                    </div>
+                    <div class="insight-item recommendation">
+                        <i class="fas fa-lightbulb text-purple me-3 fa-lg"></i>
+                        <div>
+                            <strong>Recommendation:</strong> Invest in Careem expansion and Deliveroo turnaround strategy
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <h4 class="mb-3"><i class="fas fa-filter text-primary me-2"></i>Data Filters</h4>
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <label for="branchFilter" class="form-label">Branch</label>
+                    <select class="form-select" id="branchFilter">
+                        <option value="all">All Branches</option>
+                        <option value="Elctria">Elctria</option>
+                        <option value="Hamdan St">Hamdan St</option>
+                        <option value="Khalidia">Khalidia</option>
+                        <option value="Al Qusais">Al Qusais</option>
+                        <option value="Deira City">Deira City</option>
+                        <option value="Dubai Mall">Dubai Mall</option>
+                        <option value="Jumeirah">Jumeirah</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="channelFilter" class="form-label">Channel</label>
+                    <select class="form-select" id="channelFilter">
+                        <option value="all">All Channels</option>
+                        <option value="Careem">Careem</option>
+                        <option value="Noon">Noon</option>
+                        <option value="Keeta">Keeta</option>
+                        <option value="Deliveroo">Deliveroo</option>
+                        <option value="Self Delivery">Self Delivery</option>
+                        <option value="Online Web">Online Web</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="yearFilter" class="form-label">Year</label>
+                    <select class="form-select" id="yearFilter">
+                        <option value="both">2024 & 2025</option>
+                        <option value="2024">2024</option>
+                        <option value="2025">2025</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3 d-flex align-items-end">
+                    <button class="btn btn-primary w-100" id="applyFilters">
+                        <i class="fas fa-check me-2"></i>Apply Filters
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Cards -->
+        <div class="row mb-4">
+            <div class="col-md-6 mb-4">
+                <div class="performance-card">
+                    <h5 class="mb-3"><i class="fas fa-trophy text-success me-2"></i>Top Performers</h5>
+                    <div class="performance-item top">
+                        <div>
+                            <strong>Elctria Branch</strong>
+                            <div class="text-muted">Careem Channel</div>
+                        </div>
+                        <div class="text-end">
+                            <div class="growth-positive">+368%</div>
+                            <div class="text-muted">561,600 AED</div>
+                        </div>
+                    </div>
+                    <div class="performance-item top">
+                        <div>
+                            <strong>Noon Channel</strong>
+                            <div class="text-muted">All Branches</div>
+                        </div>
+                        <div class="text-end">
+                            <div class="growth-positive">+47.7%</div>
+                            <div class="text-muted">1,152,180 AED</div>
+                        </div>
+                    </div>
+                    <div class="performance-item top">
+                        <div>
+                            <strong>Keeta Channel</strong>
+                            <div class="text-muted">Elctria Branch</div>
+                        </div>
+                        <div class="text-end">
+                            <div class="growth-positive">+100%</div>
+                            <div class="text-muted">160,000 AED</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="performance-card">
+                    <h5 class="mb-3"><i class="fas fa-exclamation-triangle text-danger me-2"></i>Underperformers</h5>
+                    <div class="performance-item bottom">
+                        <div>
+                            <strong>Deliveroo Channel</strong>
+                            <div class="text-muted">All Branches</div>
+                        </div>
+                        <div class="text-end">
+                            <div class="growth-negative">-15.8%</div>
+                            <div class="text-muted">581,400 AED</div>
+                        </div>
+                    </div>
+                    <div class="performance-item bottom">
+                        <div>
+                            <strong>Al Qusais Branch</strong>
+                            <div class="text-muted">Deliveroo Channel</div>
+                        </div>
+                        <div class="text-end">
+                            <div class="growth-negative">-15.8%</div>
+                            <div class="text-muted">105,250 AED</div>
+                        </div>
+                    </div>
+                    <div class="performance-item bottom">
+                        <div>
+                            <strong>Khalidia Branch</strong>
+                            <div class="text-muted">Self Delivery</div>
+                        </div>
+                        <div class="text-end">
+                            <div class="growth-negative">-5.2%</div>
+                            <div class="text-muted">170,800 AED</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="row mb-4">
+            <div class="col-md-6 mb-4">
+                <div class="chart-container">
+                    <h5 class="mb-3">Channel Performance Comparison</h5>
+                    <canvas id="channelChart"></canvas>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="chart-container">
+                    <h5 class="mb-3">Branch Growth Performance</h5>
+                    <canvas id="branchChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-6 mb-4">
+                <div class="chart-container">
+                    <h5 class="mb-3">Monthly Sales Trend</h5>
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="chart-container">
+                    <h5 class="mb-3">Sales Forecast</h5>
+                    <canvas id="forecastChart"></canvas>
+                    <div class="forecast-metrics">
+                        <div class="forecast-metric">
+                            <div>2026 Forecast</div>
+                            <div class="forecast-metric-value" id="forecast2026">54.2M</div>
+                        </div>
+                        <div class="forecast-metric">
+                            <div>2027 Forecast</div>
+                            <div class="forecast-metric-value" id="forecast2027">66.5M</div>
+                        </div>
+                        <div class="forecast-metric">
+                            <div>Growth Rate</div>
+                            <div class="forecast-metric-value" id="forecastGrowth">+22.6%</div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-3">
+                        <button class="btn btn-success" id="generateForecast">
+                            <i class="fas fa-calculator me-2"></i>Generate Forecast
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Entry Form -->
+        <div class="data-entry">
+            <h4 class="mb-3"><i class="fas fa-plus-circle text-primary me-2"></i>Add New Sales Data</h4>
+            <form id="dataForm">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label for="branch" class="form-label">Branch Name</label>
+                        <input type="text" class="form-control" id="branch" placeholder="e.g. Elctria" required>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="channel" class="form-label">Channel Name</label>
+                        <input type="text" class="form-control" id="channel" placeholder="e.g. Careem" required>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="sales2024" class="form-label">2024 Sales (AED)</label>
+                        <input type="number" class="form-control" id="sales2024" placeholder="e.g. 120000" required>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="sales2025" class="form-label">2025 Sales (AED)</label>
+                        <input type="number" class="form-control" id="sales2025" placeholder="e.g. 561600" required>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label for="customers" class="form-label">Customers</label>
+                        <input type="number" class="form-control" id="customers" placeholder="e.g. 1500">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="avgOrder" class="form-label">Avg Order Value</label>
+                        <input type="number" class="form-control" id="avgOrder" placeholder="e.g. 85">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="month" class="form-label">Month</label>
+                        <select class="form-select" id="month">
+                            <option value="all">All Year</option>
+                            <option value="Jan">January</option>
+                            <option value="Feb">February</option>
+                            <option value="Mar">March</option>
+                            <option value="Apr">April</option>
+                            <option value="May">May</option>
+                            <option value="Jun">June</option>
+                            <option value="Jul">July</option>
+                            <option value="Aug">August</option>
+                            <option value="Sep">September</option>
+                            <option value="Oct">October</option>
+                            <option value="Nov">November</option>
+                            <option value="Dec">December</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-save me-2"></i>Add Data
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Data Table -->
+        <div class="data-table">
+            <h4 class="mb-3"><i class="fas fa-table text-info me-2"></i>Sales Data</h4>
+            <ul class="nav nav-tabs" id="dataTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary" type="button" role="tab" aria-controls="summary" aria-selected="true">Summary</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="detailed-tab" data-bs-toggle="tab" data-bs-target="#detailed" type="button" role="tab" aria-controls="detailed" aria-selected="false">Detailed</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="monthly-tab" data-bs-toggle="tab" data-bs-target="#monthly" type="button" role="tab" aria-controls="monthly" aria-selected="false">Monthly</button>
+                </li>
+            </ul>
+            <div class="tab-content" id="dataTabsContent">
+                <div class="tab-pane fade show active" id="summary" role="tabpanel" aria-labelledby="summary-tab">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover" id="summaryTable">
+                            <thead>
+                                <tr>
+                                    <th onclick="sortTable(0)">Branch <i class="fas fa-sort"></i></th>
+                                    <th onclick="sortTable(1)">Channel <i class="fas fa-sort"></i></th>
+                                    <th onclick="sortTable(2)">2024 Sales <i class="fas fa-sort"></i></th>
+                                    <th onclick="sortTable(3)">2025 Sales <i class="fas fa-sort"></i></th>
+                                    <th onclick="sortTable(4)">Growth % <i class="fas fa-sort"></i></th>
+                                    <th>Trend</th>
+                                </tr>
+                            </thead>
+                            <tbody id="summaryTableBody">
+                                <!-- Data rows will be inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="detailed" role="tabpanel" aria-labelledby="detailed-tab">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover" id="detailedTable">
+                            <thead>
+                                <tr>
+                                    <th onclick="sortDetailedTable(0)">Branch <i class="fas fa-sort"></i></th>
+                                    <th onclick="sortDetailedTable(1)">Channel <i class="fas fa-sort"></i></th>
+                                    <th onclick="sortDetailedTable(2)">2024 Sales <i class="fas fa-sort"></i></th>
+                                    <th onclick="sortDetailedTable(3)">2025 Sales <i class="fas fa-sort"></i></th>
+                                    <th onclick="sortDetailedTable(4)">Growth % <i class="fas fa-sort"></i></th>
+                                    <th onclick="sortDetailedTable(5)">Customers <i class="fas fa-sort"></i></th>
+                                    <th onclick="sortDetailedTable(6)">Avg Order <i class="fas fa-sort"></i></th>
+                                    <th>Trend</th>
+                                </tr>
+                            </thead>
+                            <tbody id="detailedTableBody">
+                                <!-- Data rows will be inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="monthly" role="tabpanel" aria-labelledby="monthly-tab">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover" id="monthlyTable">
+                            <thead>
+                                <tr>
+                                    <th onclick="sortMonthlyTable(0)">Month <i class="fas fa-sort"></i></th>
+                                    <th onclick="sortMonthlyTable(1)">Year <i class="fas fa-sort"></i></th>
+                                    <th onclick="sortMonthlyTable(2)">Total Sales <i class="fas fa-sort"></i></th>
+                                    <th onclick="sortMonthlyTable(3)">Growth % <i class="fas fa-sort"></i></th>
+                                    <th>Trend</th>
+                                </tr>
+                            </thead>
+                            <tbody id="monthlyTableBody">
+                                <!-- Data rows will be inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="pagination-container">
+                <nav aria-label="Data pagination">
+                    <ul class="pagination" id="pagination">
+                        <!-- Pagination will be inserted here -->
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notificationContainer"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Full sample data
+        let salesData = [
+            // Elctria Branch
+            { branch: 'Elctria', channel: 'Careem', sales2024: 120000, sales2025: 561600, customers: 1500, avgOrder: 85, month: 'all' },
+            { branch: 'Elctria', channel: 'Noon', sales2024: 180000, sales2025: 265860, customers: 2100, avgOrder: 90, month: 'all' },
+            { branch: 'Elctria', channel: 'Keeta', sales2024: 80000, sales2025: 160000, customers: 950, avgOrder: 82, month: 'all' },
+            { branch: 'Elctria', channel: 'Deliveroo', sales2024: 150000, sales2025: 126300, customers: 1800, avgOrder: 78, month: 'all' },
+            { branch: 'Elctria', channel: 'Self Delivery', sales2024: 200000, sales2025: 240000, customers: 2500, avgOrder: 88, month: 'all' },
+            { branch: 'Elctria', channel: 'Online Web', sales2024: 90000, sales2025: 135000, customers: 1100, avgOrder: 92, month: 'all' },
+            
+            // Hamdan St Branch
+            { branch: 'Hamdan St', channel: 'Careem', sales2024: 95000, sales2025: 446400, customers: 1200, avgOrder: 84, month: 'all' },
+            { branch: 'Hamdan St', channel: 'Noon', sales2024: 165000, sales2025: 243645, customers: 1900, avgOrder: 89, month: 'all' },
+            { branch: 'Hamdan St', channel: 'Keeta', sales2024: 75000, sales2025: 150000, customers: 900, avgOrder: 81, month: 'all' },
+            { branch: 'Hamdan St', channel: 'Deliveroo', sales2024: 145000, sales2025: 122150, customers: 1700, avgOrder: 77, month: 'all' },
+            { branch: 'Hamdan St', channel: 'Self Delivery', sales2024: 190000, sales2025: 228000, customers: 2400, avgOrder: 87, month: 'all' },
+            { branch: 'Hamdan St', channel: 'Online Web', sales2024: 85000, sales2025: 127500, customers: 1000, avgOrder: 91, month: 'all' },
+            
+            // Khalidia Branch
+            { branch: 'Khalidia', channel: 'Careem', sales2024: 87000, sales2025: 408960, customers: 1100, avgOrder: 83, month: 'all' },
+            { branch: 'Khalidia', channel: 'Noon', sales2024: 142000, sales2025: 209874, customers: 1600, avgOrder: 88, month: 'all' },
+            { branch: 'Khalidia', channel: 'Keeta', sales2024: 70000, sales2025: 140000, customers: 850, avgOrder: 80, month: 'all' },
+            { branch: 'Khalidia', channel: 'Deliveroo', sales2024: 130000, sales2025: 109500, customers: 1500, avgOrder: 76, month: 'all' },
+            { branch: 'Khalidia', channel: 'Self Delivery', sales2024: 180000, sales2025: 170800, customers: 2200, avgOrder: 86, month: 'all' },
+            { branch: 'Khalidia', channel: 'Online Web', sales2024: 80000, sales2025: 120000, customers: 950, avgOrder: 90, month: 'all' },
+            
+            // Al Qusais Branch
+            { branch: 'Al Qusais', channel: 'Careem', sales2024: 78000, sales2025: 366240, customers: 1000, avgOrder: 82, month: 'all' },
+            { branch: 'Al Qusais', channel: 'Noon', sales2024: 138000, sales2025: 203886, customers: 1500, avgOrder: 87, month: 'all' },
+            { branch: 'Al Qusais', channel: 'Keeta', sales2024: 65000, sales2025: 130000, customers: 800, avgOrder: 79, month: 'all' },
+            { branch: 'Al Qusais', channel: 'Deliveroo', sales2024: 125000, sales2025: 105250, customers: 1400, avgOrder: 75, month: 'all' },
+            { branch: 'Al Qusais', channel: 'Self Delivery', sales2024: 170000, sales2025: 204000, customers: 2100, avgOrder: 85, month: 'all' },
+            { branch: 'Al Qusais', channel: 'Online Web', sales2024: 75000, sales2025: 112500, customers: 900, avgOrder: 89, month: 'all' },
+            
+            // Deira City Branch
+            { branch: 'Deira City', channel: 'Careem', sales2024: 92000, sales2025: 431040, customers: 1150, avgOrder: 83, month: 'all' },
+            { branch: 'Deira City', channel: 'Noon', sales2024: 155000, sales2025: 228915, customers: 1800, avgOrder: 88, month: 'all' },
+            { branch: 'Deira City', channel: 'Keeta', sales2024: 72000, sales2025: 144000, customers: 880, avgOrder: 81, month: 'all' },
+            { branch: 'Deira City', channel: 'Deliveroo', sales2024: 140000, sales2025: 118200, customers: 1600, avgOrder: 77, month: 'all' },
+            { branch: 'Deira City', channel: 'Self Delivery', sales2024: 185000, sales2025: 222000, customers: 2300, avgOrder: 87, month: 'all' },
+            { branch: 'Deira City', channel: 'Online Web', sales2024: 82000, sales2025: 123000, customers: 980, avgOrder: 91, month: 'all' },
+            
+            // Dubai Mall Branch
+            { branch: 'Dubai Mall', channel: 'Careem', sales2024: 150000, sales2025: 705000, customers: 1800, avgOrder: 86, month: 'all' },
+            { branch: 'Dubai Mall', channel: 'Noon', sales2024: 220000, sales2025: 325140, customers: 2500, avgOrder: 92, month: 'all' },
+            { branch: 'Dubai Mall', channel: 'Keeta', sales2024: 100000, sales2025: 200000, customers: 1200, avgOrder: 84, month: 'all' },
+            { branch: 'Dubai Mall', channel: 'Deliveroo', sales2024: 180000, sales2025: 151560, customers: 2100, avgOrder: 80, month: 'all' },
+            { branch: 'Dubai Mall', channel: 'Self Delivery', sales2024: 250000, sales2025: 300000, customers: 3000, avgOrder: 90, month: 'all' },
+            { branch: 'Dubai Mall', channel: 'Online Web', sales2024: 120000, sales2025: 180000, customers: 1400, avgOrder: 94, month: 'all' },
+            
+            // Jumeirah Branch
+            { branch: 'Jumeirah', channel: 'Careem', sales2024: 110000, sales2025: 516800, customers: 1400, avgOrder: 85, month: 'all' },
+            { branch: 'Jumeirah', channel: 'Noon', sales2024: 190000, sales2025: 280630, customers: 2200, avgOrder: 91, month: 'all' },
+            { branch: 'Jumeirah', channel: 'Keeta', sales2024: 85000, sales2025: 170000, customers: 1000, avgOrder: 83, month: 'all' },
+            { branch: 'Jumeirah', channel: 'Deliveroo', sales2024: 160000, sales2025: 134720, customers: 1900, avgOrder: 79, month: 'all' },
+            { branch: 'Jumeirah', channel: 'Self Delivery', sales2024: 210000, sales2025: 252000, customers: 2600, avgOrder: 89, month: 'all' },
+            { branch: 'Jumeirah', channel: 'Online Web', sales2024: 100000, sales2025: 150000, customers: 1200, avgOrder: 93, month: 'all' }
+        ];
+
+        // Monthly trend data
+        let monthlyTrendData = [
+            // 2024 Data
+            { month: 'Jan', year: 2024, sales: 2800000 },
+            { month: 'Feb', year: 2024, sales: 2900000 },
+            { month: 'Mar', year: 2024, sales: 3100000 },
+            { month: 'Apr', year: 2024, sales: 2950000 },
+            { month: 'May', year: 2024, sales: 3050000 },
+            { month: 'Jun', year: 2024, sales: 3200000 },
+            { month: 'Jul', year: 2024, sales: 3300000 },
+            { month: 'Aug', year: 2024, sales: 3150000 },
+            { month: 'Sep', year: 2024, sales: 3000000 },
+            { month: 'Oct', year: 2024, sales: 3100000 },
+            { month: 'Nov', year: 2024, sales: 3250000 },
+            { month: 'Dec', year: 2024, sales: 3400000 },
+            
+            // 2025 Data
+            { month: 'Jan', year: 2025, sales: 3400000 },
+            { month: 'Feb', year: 2025, sales: 3550000 },
+            { month: 'Mar', year: 2025, sales: 3750000 },
+            { month: 'Apr', year: 2025, sales: 3650000 },
+            { month: 'May', year: 2025, sales: 3800000 },
+            { month: 'Jun', year: 2025, sales: 3950000 },
+            { month: 'Jul', year: 2025, sales: 4100000 },
+            { month: 'Aug', year: 2025, sales: 3950000 },
+            { month: 'Sep', year: 2025, sales: 3800000 },
+            { month: 'Oct', year: 2025, sales: 3900000 },
+            { month: 'Nov', year: 2025, sales: 4050000 },
+            { month: 'Dec', year: 2025, sales: 4200000 }
+        ];
+
+        // Pagination variables
+        let currentPage = 1;
+        const rowsPerPage = 10;
+        let filteredData = [...salesData];
+        let sortDirection = {};
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDashboard();
+            initializeCharts();
+            updateSummaryTable();
+            updateDetailedTable();
+            updateMonthlyTable();
+            setupPagination();
+            
+            // Form submission
+            document.getElementById('dataForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                addNewData();
+            });
+            
+            // Reset form
+            document.getElementById('resetForm')?.addEventListener('click', function() {
+                document.getElementById('dataForm').reset();
+            });
+            
+            // Generate forecast
+            document.getElementById('generateForecast').addEventListener('click', function() {
+                generateForecast();
+            });
+            
+            // Apply filters
+            document.getElementById('applyFilters').addEventListener('click', function() {
+                applyFilters();
+            });
+            
+            // Refresh dashboard
+            document.getElementById('refreshBtn').addEventListener('click', function() {
+                updateDashboard();
+                updateLastUpdatedTime();
+            });
+        });
+
+        // Update dashboard metrics
+        function updateDashboard() {
+            // Calculate totals
+            const total2024 = salesData.reduce((sum, item) => sum + item.sales2024, 0);
+            const total2025 = salesData.reduce((sum, item) => sum + item.sales2025, 0);
+            const growth = ((total2025 - total2024) / total2024 * 100).toFixed(1);
+            const increase = (total2025 - total2024).toLocaleString();
+            
+            // Calculate additional metrics
+            const totalCustomers = salesData.reduce((sum, item) => sum + (item.customers || 0), 0);
+            const avgOrderValue = salesData.reduce((sum, item) => sum + (item.avgOrder || 0), 0) / salesData.length;
+            
+            // Update UI
+            document.getElementById('total2024').textContent = `${(total2024 / 1000000).toFixed(2)}M`;
+            document.getElementById('total2025').textContent = `${(total2025 / 1000000).toFixed(2)}M`;
+            document.getElementById('growth').textContent = `${growth > 0 ? '+' : ''}${growth}%`;
+            document.getElementById('increase').textContent = `${increase > 0 ? '+' : ''}${(increase / 1000000).toFixed(2)}M`;
+            document.getElementById('avgOrder').textContent = `${avgOrderValue.toFixed(0)} AED`;
+            document.getElementById('customers').textContent = `${(totalCustomers / 1000).toFixed(0)}K`;
+            
+            // Update growth color
+            const growthElement = document.getElementById('growth');
+            if (growth > 0) {
+                growthElement.classList.add('text-success');
+                growthElement.classList.remove('text-danger');
+            } else {
+                growthElement.classList.add('text-danger');
+                growthElement.classList.remove('text-success');
+            }
+        }
+
+        // Initialize charts
+        function initializeCharts() {
+            // Channel Performance Chart
+            const channelCtx = document.getElementById('channelChart').getContext('2d');
+            const channelData = aggregateByChannel();
+            
+            window.channelChart = new Chart(channelCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(channelData),
+                    datasets: [
+                        {
+                            label: '2024 Sales',
+                            data: Object.values(channelData).map(item => item.sales2024),
+                            backgroundColor: 'rgba(30, 136, 229, 0.7)',
+                            borderColor: 'rgba(30, 136, 229, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: '2025 Sales',
+                            data: Object.values(channelData).map(item => item.sales2025),
+                            backgroundColor: 'rgba(67, 160, 71, 0.7)',
+                            borderColor: 'rgba(67, 160, 71, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return (value / 1000000).toFixed(1) + 'M';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.raw.toLocaleString() + ' AED';
+                                }
+                            }
+                        },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'top',
+                            formatter: function(value) {
+                                return (value / 1000000).toFixed(1) + 'M';
+                            }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+            
+            // Branch Growth Chart
+            const branchCtx = document.getElementById('branchChart').getContext('2d');
+            const branchData = aggregateByBranch();
+            
+            window.branchChart = new Chart(branchCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(branchData),
+                    datasets: [{
+                        label: 'Growth %',
+                        data: Object.values(branchData).map(item => item.growth),
+                        backgroundColor: function(context) {
+                            const value = context.dataset.data[context.dataIndex];
+                            return value > 0 ? 'rgba(67, 160, 71, 0.7)' : 'rgba(229, 57, 53, 0.7)';
+                        },
+                        borderColor: function(context) {
+                            const value = context.dataset.data[context.dataIndex];
+                            return value > 0 ? 'rgba(67, 160, 71, 1)' : 'rgba(229, 57, 53, 1)';
+                        },
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Growth: ' + context.raw + '%';
+                                }
+                            }
+                        },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'top',
+                            formatter: function(value) {
+                                return value + '%';
+                            }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+            
+            // Sales Trend Chart
+            const trendCtx = document.getElementById('trendChart').getContext('2d');
+            
+            window.trendChart = new Chart(trendCtx, {
+                type: 'line',
+                data: {
+                    labels: monthlyTrendData.map(item => item.month + ' ' + item.year),
+                    datasets: [{
+                        label: 'Monthly Sales',
+                        data: monthlyTrendData.map(item => item.sales),
+                        backgroundColor: 'rgba(229, 57, 53, 0.2)',
+                        borderColor: 'rgba(229, 57, 53, 1)',
+                        borderWidth: 3,
+                        pointBackgroundColor: 'rgba(229, 57, 53, 1)',
+                        pointRadius: 6,
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return (value / 1000000).toFixed(1) + 'M';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Sales: ' + context.raw.toLocaleString() + ' AED';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Forecast Chart
+            const forecastCtx = document.getElementById('forecastChart').getContext('2d');
+            
+            window.forecastChart = new Chart(forecastCtx, {
+                type: 'line',
+                data: {
+                    labels: ['2024', '2025'],
+                    datasets: [{
+                        label: 'Actual Sales',
+                        data: [
+                            salesData.reduce((sum, item) => sum + item.sales2024, 0),
+                            salesData.reduce((sum, item) => sum + item.sales2025, 0)
+                        ],
+                        backgroundColor: 'rgba(229, 57, 53, 0.2)',
+                        borderColor: 'rgba(229, 57, 53, 1)',
+                        borderWidth: 3,
+                        pointBackgroundColor: 'rgba(229, 57, 53, 1)',
+                        pointRadius: 6,
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return (value / 1000000).toFixed(1) + 'M';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Sales: ' + context.raw.toLocaleString() + ' AED';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Aggregate data by channel
+        function aggregateByChannel() {
+            const result = {};
+            
+            salesData.forEach(item => {
+                if (!result[item.channel]) {
+                    result[item.channel] = {
+                        sales2024: 0,
+                        sales2025: 0
+                    };
+                }
+                
+                result[item.channel].sales2024 += item.sales2024;
+                result[item.channel].sales2025 += item.sales2025;
+            });
+            
+            return result;
+        }
+
+        // Aggregate data by branch
+        function aggregateByBranch() {
+            const result = {};
+            
+            salesData.forEach(item => {
+                if (!result[item.branch]) {
+                    result[item.branch] = {
+                        sales2024: 0,
+                        sales2025: 0,
+                        growth: 0
+                    };
+                }
+                
+                result[item.branch].sales2024 += item.sales2024;
+                result[item.branch].sales2025 += item.sales2025;
+            });
+            
+            // Calculate growth percentage
+            Object.keys(result).forEach(branch => {
+                const branchData = result[branch];
+                branchData.growth = ((branchData.sales2025 - branchData.sales2024) / branchData.sales2024 * 100).toFixed(1);
+            });
+            
+            return result;
+        }
+
+        // Update summary table
+        function updateSummaryTable() {
+            const tableBody = document.getElementById('summaryTableBody');
+            tableBody.innerHTML = '';
+            
+            const startIndex = (currentPage - 1) * rowsPerPage;
+            const endIndex = startIndex + rowsPerPage;
+            const paginatedData = filteredData.slice(startIndex, endIndex);
+            
+            paginatedData.forEach(item => {
+                const growth = ((item.sales2025 - item.sales2024) / item.sales2024 * 100).toFixed(1);
+                const growthClass = growth > 0 ? 'growth-positive' : 'growth-negative';
+                const trendIcon = growth > 0 ? 'fa-arrow-up' : 'fa-arrow-down';
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.branch}</td>
+                    <td>${item.channel}</td>
+                    <td>${item.sales2024.toLocaleString()} AED</td>
+                    <td>${item.sales2025.toLocaleString()} AED</td>
+                    <td class="${growthClass}">${growth > 0 ? '+' : ''}${growth}%</td>
+                    <td><i class="fas ${trendIcon} ${growthClass}"></i></td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Update detailed table
+        function updateDetailedTable() {
+            const tableBody = document.getElementById('detailedTableBody');
+            tableBody.innerHTML = '';
+            
+            const startIndex = (currentPage - 1) * rowsPerPage;
+            const endIndex = startIndex + rowsPerPage;
+            const paginatedData = filteredData.slice(startIndex, endIndex);
+            
+            paginatedData.forEach(item => {
+                const growth = ((item.sales2025 - item.sales2024) / item.sales2024 * 100).toFixed(1);
+                const growthClass = growth > 0 ? 'growth-positive' : 'growth-negative';
+                const trendIcon = growth > 0 ? 'fa-arrow-up' : 'fa-arrow-down';
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.branch}</td>
+                    <td>${item.channel}</td>
+                    <td>${item.sales2024.toLocaleString()} AED</td>
+                    <td>${item.sales2025.toLocaleString()} AED</td>
+                    <td class="${growthClass}">${growth > 0 ? '+' : ''}${growth}%</td>
+                    <td>${(item.customers || 0).toLocaleString()}</td>
+                    <td>${(item.avgOrder || 0).toFixed(0)} AED</td>
+                    <td><i class="fas ${trendIcon} ${growthClass}"></i></td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Update monthly table
+        function updateMonthlyTable() {
+            const tableBody = document.getElementById('monthlyTableBody');
+            tableBody.innerHTML = '';
+            
+            // Calculate monthly growth
+            const monthlyData = [];
+            for (let i = 0; i < monthlyTrendData.length - 12; i++) {
+                const current = monthlyTrendData[i + 12];
+                const previous = monthlyTrendData[i];
+                const growth = ((current.sales - previous.sales) / previous.sales * 100).toFixed(1);
+                
+                monthlyData.push({
+                    month: current.month,
+                    year: current.year,
+                    sales: current.sales,
+                    growth: growth
+                });
+            }
+            
+            const startIndex = (currentPage - 1) * rowsPerPage;
+            const endIndex = startIndex + rowsPerPage;
+            const paginatedData = monthlyData.slice(startIndex, endIndex);
+            
+            paginatedData.forEach(item => {
+                const growthClass = item.growth > 0 ? 'growth-positive' : 'growth-negative';
+                const trendIcon = item.growth > 0 ? 'fa-arrow-up' : 'fa-arrow-down';
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.month}</td>
+                    <td>${item.year}</td>
+                    <td>${item.sales.toLocaleString()} AED</td>
+                    <td class="${growthClass}">${item.growth > 0 ? '+' : ''}${item.growth}%</td>
+                    <td><i class="fas ${trendIcon} ${growthClass}"></i></td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Setup pagination
+        function setupPagination() {
+            const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+            
+            // Previous button
+            const prevLi = document.createElement('li');
+            prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+            prevLi.innerHTML = `<a class="page-link" href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>`;
+            prevLi.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (currentPage > 1) {
+                    currentPage--;
+                    updateTables();
+                    setupPagination();
+                }
+            });
+            pagination.appendChild(prevLi);
+            
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                const li = document.createElement('li');
+                li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+                li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+                li.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    currentPage = i;
+                    updateTables();
+                    setupPagination();
+                });
+                pagination.appendChild(li);
+            }
+            
+            // Next button
+            const nextLi = document.createElement('li');
+            nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+            nextLi.innerHTML = `<a class="page-link" href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>`;
+            nextLi.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    updateTables();
+                    setupPagination();
+                }
+            });
+            pagination.appendChild(nextLi);
+        }
+
+        // Update all tables
+        function updateTables() {
+            updateSummaryTable();
+            updateDetailedTable();
+            updateMonthlyTable();
+        }
+
+        // Sort table
+        function sortTable(columnIndex) {
+            const table = document.getElementById('summaryTable');
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            
+            // Toggle sort direction
+            sortDirection[columnIndex] = sortDirection[columnIndex] === 'asc' ? 'desc' : 'asc';
+            
+            // Sort rows
+            rows.sort((a, b) => {
+                const aValue = a.cells[columnIndex].textContent;
+                const bValue = b.cells[columnIndex].textContent;
+                
+                // Handle numeric values
+                if (columnIndex >= 2 && columnIndex <= 4) {
+                    const aNum = parseFloat(aValue.replace(/[^0-9.-]+/g, ''));
+                    const bNum = parseFloat(bValue.replace(/[^0-9.-]+/g, ''));
+                    
+                    if (sortDirection[columnIndex] === 'asc') {
+                        return aNum - bNum;
+                    } else {
+                        return bNum - aNum;
+                    }
+                } else {
+                    // Handle text values
+                    if (sortDirection[columnIndex] === 'asc') {
+                        return aValue.localeCompare(bValue);
+                    } else {
+                        return bValue.localeCompare(aValue);
+                    }
+                }
+            });
+            
+            // Re-append sorted rows
+            rows.forEach(row => tbody.appendChild(row));
+        }
+
+        // Sort detailed table
+        function sortDetailedTable(columnIndex) {
+            const table = document.getElementById('detailedTable');
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            
+            // Toggle sort direction
+            sortDirection[columnIndex] = sortDirection[columnIndex] === 'asc' ? 'desc' : 'asc';
+            
+            // Sort rows
+            rows.sort((a, b) => {
+                const aValue = a.cells[columnIndex].textContent;
+                const bValue = b.cells[columnIndex].textContent;
+                
+                // Handle numeric values
+                if (columnIndex >= 2 && columnIndex <= 6) {
+                    const aNum = parseFloat(aValue.replace(/[^0-9.-]+/g, ''));
+                    const bNum = parseFloat(bValue.replace(/[^0-9.-]+/g, ''));
+                    
+                    if (sortDirection[columnIndex] === 'asc') {
+                        return aNum - bNum;
+                    } else {
+                        return bNum - aNum;
+                    }
+                } else {
+                    // Handle text values
+                    if (sortDirection[columnIndex] === 'asc') {
+                        return aValue.localeCompare(bValue);
+                    } else {
+                        return bValue.localeCompare(aValue);
+                    }
+                }
+            });
+            
+            // Re-append sorted rows
+            rows.forEach(row => tbody.appendChild(row));
+        }
+
+        // Sort monthly table
+        function sortMonthlyTable(columnIndex) {
+            const table = document.getElementById('monthlyTable');
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            
+            // Toggle sort direction
+            sortDirection[columnIndex] = sortDirection[columnIndex] === 'asc' ? 'desc' : 'asc';
+            
+            // Sort rows
+            rows.sort((a, b) => {
+                const aValue = a.cells[columnIndex].textContent;
+                const bValue = b.cells[columnIndex].textContent;
+                
+                // Handle numeric values
+                if (columnIndex >= 2 && columnIndex <= 3) {
+                    const aNum = parseFloat(aValue.replace(/[^0-9.-]+/g, ''));
+                    const bNum = parseFloat(bValue.replace(/[^0-9.-]+/g, ''));
+                    
+                    if (sortDirection[columnIndex] === 'asc') {
+                        return aNum - bNum;
+                    } else {
+                        return bNum - aNum;
+                    }
+                } else {
+                    // Handle text values
+                    if (sortDirection[columnIndex] === 'asc') {
+                        return aValue.localeCompare(bValue);
+                    } else {
+                        return bValue.localeCompare(aValue);
+                    }
+                }
+            });
+            
+            // Re-append sorted rows
+            rows.forEach(row => tbody.appendChild(row));
+        }
+
+        // Add new data
+        function addNewData() {
+            const branch = document.getElementById('branch').value;
+            const channel = document.getElementById('channel').value;
+            const sales2024 = parseInt(document.getElementById('sales2024').value);
+            const sales2025 = parseInt(document.getElementById('sales2025').value);
+            const customers = parseInt(document.getElementById('customers').value) || 0;
+            const avgOrder = parseInt(document.getElementById('avgOrder').value) || 0;
+            const month = document.getElementById('month').value;
+            
+            // Add to data array
+            salesData.push({
+                branch,
+                channel,
+                sales2024,
+                sales2025,
+                customers,
+                avgOrder,
+                month
+            });
+            
+            // Update filtered data
+            filteredData = [...salesData];
+            
+            // Update dashboard
+            updateDashboard();
+            updateCharts();
+            updateTables();
+            setupPagination();
+            
+            // Reset form
+            document.getElementById('dataForm').reset();
+            
+            // Show success message
+            showNotification('Data added successfully!', 'success');
+            
+            // Update last updated time
+            updateLastUpdatedTime();
+        }
+
+        // Update charts with new data
+        function updateCharts() {
+            // Update channel chart
+            const channelData = aggregateByChannel();
+            window.channelChart.data.labels = Object.keys(channelData);
+            window.channelChart.data.datasets[0].data = Object.values(channelData).map(item => item.sales2024);
+            window.channelChart.data.datasets[1].data = Object.values(channelData).map(item => item.sales2025);
+            window.channelChart.update();
+            
+            // Update branch chart
+            const branchData = aggregateByBranch();
+            window.branchChart.data.labels = Object.keys(branchData);
+            window.branchChart.data.datasets[0].data = Object.values(branchData).map(item => item.growth);
+            window.branchChart.update();
+            
+            // Update trend chart
+            window.trendChart.data.datasets[0].data = monthlyTrendData.map(item => item.sales);
+            window.trendChart.update();
+            
+            // Update forecast chart
+            window.forecastChart.data.datasets[0].data = [
+                salesData.reduce((sum, item) => sum + item.sales2024, 0),
+                salesData.reduce((sum, item) => sum + item.sales2025, 0)
+            ];
+            window.forecastChart.update();
+        }
+
+        // Generate forecast
+        function generateForecast() {
+            const total2024 = salesData.reduce((sum, item) => sum + item.sales2024, 0);
+            const total2025 = salesData.reduce((sum, item) => sum + item.sales2025, 0);
+            const growthRate = (total2025 - total2024) / total2024;
+            
+            // Calculate forecast for next 2 years
+            const forecast2026 = total2025 * (1 + growthRate);
+            const forecast2027 = forecast2026 * (1 + growthRate);
+            
+            // Update forecast chart
+            window.forecastChart.data.labels = ['2024', '2025', '2026 (Forecast)', '2027 (Forecast)'];
+            window.forecastChart.data.datasets[0].data = [total2024, total2025, forecast2026, forecast2027];
+            
+            // Add forecast dataset
+            if (window.forecastChart.data.datasets.length < 2) {
+                window.forecastChart.data.datasets.push({
+                    label: 'Forecast',
+                    data: [null, null, forecast2026, forecast2027],
+                    backgroundColor: 'rgba(255, 179, 0, 0.2)',
+                    borderColor: 'rgba(255, 179, 0, 1)',
+                    borderWidth: 3,
+                    pointBackgroundColor: 'rgba(255, 179, 0, 1)',
+                    pointRadius: 6,
+                    borderDash: [5, 5],
+                    tension: 0.3,
+                    fill: true
+                });
+            } else {
+                window.forecastChart.data.datasets[1].data = [null, null, forecast2026, forecast2027];
+            }
+            
+            window.forecastChart.update();
+            
+            // Update forecast metrics
+            document.getElementById('forecast2026').textContent = `${(forecast2026 / 1000000).toFixed(1)}M`;
+            document.getElementById('forecast2027').textContent = `${(forecast2027 / 1000000).toFixed(1)}M`;
+            document.getElementById('forecastGrowth').textContent = `${(growthRate * 100).toFixed(1)}%`;
+            
+            // Show notification
+            showNotification('Forecast generated successfully!', 'success');
+        }
+
+        // Apply filters
+        function applyFilters() {
+            const branchFilter = document.getElementById('branchFilter').value;
+            const channelFilter = document.getElementById('channelFilter').value;
+            const yearFilter = document.getElementById('yearFilter').value;
+            
+            // Reset filtered data
+            filteredData = [...salesData];
+            
+            // Apply branch filter
+            if (branchFilter !== 'all') {
+                filteredData = filteredData.filter(item => item.branch === branchFilter);
+            }
+            
+            // Apply channel filter
+            if (channelFilter !== 'all') {
+                filteredData = filteredData.filter(item => item.channel === channelFilter);
+            }
+            
+            // Apply year filter
+            if (yearFilter === '2024') {
+                filteredData = filteredData.map(item => ({
+                    ...item,
+                    sales2025: 0 // Set 2025 sales to 0 to show only 2024 data
+                }));
+            } else if (yearFilter === '2025') {
+                filteredData = filteredData.map(item => ({
+                    ...item,
+                    sales2024: 0 // Set 2024 sales to 0 to show only 2025 data
+                }));
+            }
+            
+            // Reset pagination
+            currentPage = 1;
+            
+            // Update tables
+            updateTables();
+            setupPagination();
+            
+            // Show notification
+            showNotification('Filters applied successfully!', 'info');
+        }
+
+        // Show notification
+        function showNotification(message, type) {
+            const notificationContainer = document.getElementById('notificationContainer');
+            
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show notification`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            
+            notificationContainer.appendChild(alertDiv);
+            
+            // Auto dismiss after 3 seconds
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 3000);
+        }
+
+        // Update last updated time
+        function updateLastUpdatedTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            document.getElementById('lastUpdated').textContent = timeString;
+        }
+    </script>
+</body>
+</html>
