@@ -3,230 +3,29 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Crispy Chicken — Pro Dashboard</title>
+  <title>Self-Delivery vs Online Web Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #f5f7fb;
+      --bg: #f0f4f8;
       --card: #ffffff;
-      --muted: #64748b;
-      --success: #16a34a;
-      --danger: #dc2626;
-      --primary: #4f46e5;
+      --muted: #6b7280;
+      --green: #10b981;
+      --red: #ef4444;
+      --accent: #3b82f6;
+      --glass: rgba(0,0,0,0.03);
     }
-    *{box-sizing:border-box}
-    body{margin:0;background:var(--bg);font-family:Inter}
-    .container{max-width:1300px;margin:auto;padding:20px}
-    header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
-    h1{margin:0;font-size:22px;font-weight:700}
-    .controls{display:flex;gap:10px}
-    select,button{padding:8px 12px;border-radius:8px;border:1px solid #cbd5e1;background:white}
-    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
-    .card{background:var(--card);padding:16px;border-radius:14px;box-shadow:0 4px 10px rgba(0,0,0,0.05)}
-    .kpi{grid-column:span 3;border-left:6px solid var(--primary)}
-    .kpi h3{margin:0;font-size:13px;color:var(--muted)}
-    .kpi .value{font-size:26px;font-weight:700;margin-top:6px}
-    canvas{width:100%!important;max-height:360px}
-    table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px}
-    th,td{padding:8px;border-bottom:1px solid #e2e8f0;text-align:left}
-    .up{color:var(--success);font-weight:700}
-    .down{color:var(--danger);font-weight:700}
-  </style>
-</head>
-<body>
-<div class="container">
 
-<header>
-  <h1>Crispy Chicken — Professional Performance Dashboard</h1>
-  <div class="controls">
-    <select id="branchSelect"></select>
-    <select id="yearSelect">
-      <option value="all">2024 vs 2025</option>
-      <option value="2024">2024 Only</option>
-      <option value="2025">2025 Only</option>
-    </select>
-    <button id="resetBtn">Reset</button>
-  </div>
-</header>
-
-<section class="grid">
-  <div class="card kpi"><h3>Total 2024</h3><div class="value" id="val2024">-</div></div>
-  <div class="card kpi"><h3>Total 2025</h3><div class="value" id="val2025">-</div></div>
-  <div class="card kpi"><h3>Growth %</h3><div class="value" id="growthVal">-</div></div>
-  <div class="card kpi"><h3>Best Branch</h3><div class="value" id="bestBranch">-</div></div>
-
-  <div class="card" style="grid-column:span 12"><h3>Branch Comparison</h3><canvas id="branchChart"></canvas></div>
-  <div class="card" style="grid-column:span 12"><h3>Ranking Chart</h3><canvas id="rankChart"></canvas></div>
-  <div class="card" style="grid-column:span 12"><h3>Monthly Trend</h3><canvas id="trendChart"></canvas></div>
-
-  <div class="card" style="grid-column:span 12">
-    <h3>Branch Performance Table</h3>
-    <table id="perfTable"></table>
-  </div>
-</section>
-
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-/* ==========================
-   RAW DATA
-========================== */
-const DATA = {
-  rows:[
-    ['Hamdan St',7444537,8297881],
-    ['Khaldia',6039662,6293740],
-    ['Shabiya 11',6510384,5502957],
-    ['Muroor',5125737,4767127],
-    ['Al Barsha',6257407,5753883],
-    ['Al Satwa',4774601,2631356],
-    ['Elctria',7637929,2830175],
-    ['Al Rigga',442475,0]
-  ]
-};
-
-const branches = DATA.rows.map(r=>r[0]);
-const totals25 = DATA.rows.map(r=>r[1]);
-const totals24 = DATA.rows.map(r=>r[2]);
-
-function fmt(n){return n.toLocaleString()}
-function growth(a,b){return ((b-a)/a)*100}
-
-/* ==========================
-   POPULATE SELECT
-========================== */
-const sel=document.getElementById('branchSelect');
-branches.forEach(b=>{
-  const o=document.createElement('option');
-  o.textContent=b;
-  sel.appendChild(o);
-});
-sel.value=branches[0];
-
-/* ==========================
-   UPDATE KPIs
-========================== */
-function updateKPIs(){
-  let idx=branches.indexOf(sel.value);
-  let t24=totals24[idx]; 
-  let t25=totals25[idx];
-
-  document.getElementById('val2024').textContent = fmt(t24);
-  document.getElementById('val2025').textContent = fmt(t25);
-
-  let g=growth(t24,t25);
-  document.getElementById('growthVal').textContent = 
-    (g>0?"🔼 ":"🔻 ") + g.toFixed(1) + "%";
-
-  // Best Branch
-  let maxIndex = totals25.indexOf(Math.max(...totals25));
-  document.getElementById('bestBranch').textContent = branches[maxIndex];
-}
-
-/* ==========================
-   TABLE
-========================== */
-function buildTable(){
-  let html = `
-    <tr>
-      <th>Branch</th>
-      <th>2024</th>
-      <th>2025</th>
-      <th>Growth %</th>
-    </tr>
-  `;
-
-  DATA.rows.forEach(row=>{
-    let g = growth(row[2], row[1]);
-    html+=`
-      <tr>
-        <td>${row[0]}</td>
-        <td>${fmt(row[2])}</td>
-        <td>${fmt(row[1])}</td>
-        <td class="${g>0?'up':'down'}">${g.toFixed(1)}%</td>
-      </tr>
-    `;
-  });
-
-  document.getElementById('perfTable').innerHTML = html;
-}
-
-/* ==========================
-   CHARTS
-========================== */
-let branchChart, rankChart, trendChart;
-
-function renderCharts(){
-  // Destroy if exists
-  if(branchChart) branchChart.destroy();
-  if(rankChart) rankChart.destroy();
-  if(trendChart) trendChart.destroy();
-
-  // Branch Comparison (bar)
-  branchChart = new Chart(document.getElementById("branchChart"),{
-    type:"bar",
-    data:{
-      labels:branches,
-      datasets:[
-        {label:"2024",data:totals24,backgroundColor:"#6366f1"},
-        {label:"2025",data:totals25,backgroundColor:"#10b981"}
-      ]
-    }
-  });
-
-  // Ranking Chart (horizontal)
-  const sorted = [...DATA.rows].sort((a,b)=>b[1]-a[1]);
-  rankChart = new Chart(document.getElementById("rankChart"),{
-    type:"bar",
-    data:{
-      labels:sorted.map(r=>r[0]),
-      datasets:[{
-        label:"2025 Rank",
-        data:sorted.map(r=>r[1]),
-        backgroundColor:"#4f46e5"
-      }]
-    },
-    options:{indexAxis:"y"}
-  });
-
-  // Monthly Trend (dummy data for now)
-  trendChart = new Chart(document.getElementById("trendChart"),{
-    type:"line",
-    data:{
-      labels:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
-      datasets:[{
-        label:"Trend",
-        data:[12,14,9,15,17,13,18,16,19,15,20,21],
-        borderColor:"#4f46e5",
-        tension:0.3
-      }]
-    }
-  });
-}
-
-/* ==========================
-   RESET
-========================== */
-document.getElementById("resetBtn").onclick = ()=>{
-  sel.value = branches[0];
-  document.getElementById('yearSelect').value="all";
-  updateKPIs();
-  renderCharts();
-};
-
-/* ==========================
-   INIT
-========================== */
-updateKPIs();
-buildTable();
-renderCharts();
-
-/* When branch changes */
-sel.onchange = ()=>{
-  updateKPIs();
-  renderCharts();
-};
-</script>
-
-</body>
-</html>
+    body { margin:0; font-family: Inter, sans-serif; background: var(--bg); color: #0f172a; }
+    .container { max-width: 1200px; margin: 24px auto; padding: 20px; }
+    h1 { font-size: 22px; margin-bottom: 8px; }
+    .grid { display: grid; grid-template-columns: repeat(12,1fr); gap:16px; }
+    .card { background: var(--card); border-radius:12px; padding:16px; box-shadow:0 2px 8px rgba(0,0,0,0.05); }
+    .kpi { grid-column: span 3; text-align:center; }
+    .kpi .value { font-size: 22px; font-weight:600; margin-top:6px; }
+    .trend { font-size:14px; margin-top:4px; }
+    canvas { width:100% !important; height:320px !important; }
+    .full { grid-column: span 12; }
+    .wide { grid-column: span 6; }
+    .summary { margin-top:12px; display:flex; gap:12px; flex-wrap:wrap; }
+    .summary
