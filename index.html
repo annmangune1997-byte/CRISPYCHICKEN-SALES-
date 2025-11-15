@@ -1,28 +1,31 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Crispy Chicken — Pro Dashboard (Enhanced)</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
   <style>
     :root{
       --bg:#f5f7fb; --card:#fff; --muted:#64748b; --primary:#4f46e5;
       --success:#16a34a; --danger:#dc2626; --glass: rgba(255,255,255,0.6);
-      --accent:#e6eefc;
+      --accent:#e6eefc; --warning:#f59e0b; --info:#3b82f6;
     }
     [data-theme="dark"]{
       --bg:#0b1220; --card:#0f1724; --muted:#9aa9bf; --primary:#7c3aed;
       --success:#10b981; --danger:#fb7185; --glass: rgba(255,255,255,0.04);
-      --accent:#0b122666;
+      --accent:#0b122666; --warning:#fbbf24; --info:#60a5fa;
     }
 
     *{box-sizing:border-box}
     body{margin:0;background:var(--bg);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;color:var(--muted);transition:background .25s,color .25s}
-    .container{max-width:1300px;margin:24px auto;padding:18px}
+    .container{max-width:1400px;margin:24px auto;padding:18px}
     header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;gap:12px}
     h1{margin:0;font-size:20px;color:var(--primary);font-weight:700}
-    .controls{display:flex;gap:10px;align-items:center}
+    .controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
     select,button,input{padding:8px 12px;border-radius:10px;border:1px solid #cbd5e1;background:var(--card);color:inherit}
     .icon-btn{display:inline-flex;align-items:center;gap:8px;cursor:pointer}
     .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
@@ -46,11 +49,13 @@
     .muted-small{font-size:12px;color:var(--muted)}
     .actions{display:flex;gap:8px}
     .center{display:flex;align-items:center;gap:10px}
+    
     /* login modal */
     .modal-backdrop{position:fixed;inset:0;background:rgba(2,6,23,0.6);display:flex;align-items:center;justify-content:center;z-index:80}
     .modal{background:var(--card);padding:20px;border-radius:12px;min-width:320px;box-shadow:0 12px 40px rgba(2,6,23,0.4)}
     .form-row{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
     .small-link{font-size:12px;color:var(--primary);cursor:pointer}
+    
     /* responsive */
     @media (max-width:1000px){
       .kpi{grid-column:span 6}
@@ -61,12 +66,63 @@
       .grid{grid-template-columns:repeat(1,1fr)}
       .kpi{grid-column:span 1}
     }
+    
     /* subtle animations */
     .fade-in{animation:fadeIn .45s ease both}
     @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+    
+    /* Enhanced styles */
+    .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+    .kpi-card{background:var(--card);border-radius:12px;padding:16px;box-shadow:0 4px 12px rgba(0,0,0,0.08);position:relative;overflow:hidden}
+    .kpi-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--primary)}
+    .kpi-card.success::before{background:var(--success)}
+    .kpi-card.danger::before{background:var(--danger)}
+    .kpi-card.warning::before{background:var(--warning)}
+    .kpi-card.info::before{background:var(--info)}
+    .kpi-value{font-size:28px;font-weight:700;margin:8px 0}
+    .kpi-label{font-size:14px;color:var(--muted);margin-bottom:4px}
+    .kpi-change{display:flex;align-items:center;gap:4px;font-size:12px}
+    .kpi-change i{font-size:10px}
+    
+    .insight-card{background:var(--accent);border-radius:10px;padding:12px;margin-bottom:12px}
+    .insight-title{font-weight:600;display:flex;align-items:center;gap:8px;margin-bottom:6px}
+    .insight-content{font-size:14px}
+    .insight-tag{display:inline-block;background:var(--primary);color:white;padding:2px 8px;border-radius:12px;font-size:11px;margin-left:8px}
+    
+    .comparison-table{width:100%;border-collapse:collapse;margin-top:10px}
+    .comparison-table th{background:var(--accent);font-weight:600;padding:10px;text-align:left}
+    .comparison-table td{padding:10px;border-bottom:1px solid rgba(0,0,0,0.06)}
+    .comparison-table tr:hover{background:var(--accent)}
+    
+    .forecast-container{background:var(--accent);border-radius:10px;padding:16px;margin-top:12px}
+    .forecast-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+    .forecast-item{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.06)}
+    .forecast-item:last-child{border-bottom:none}
+    
+    .metric-card{background:var(--card);border-radius:10px;padding:12px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+    .metric-title{font-weight:600;margin-bottom:8px}
+    .metric-value{font-size:24px;font-weight:700;margin-bottom:4px}
+    .metric-change{font-size:12px;display:flex;align-items:center;gap:4px}
+    
+    .tabs{display:flex;gap:8px;margin-bottom:16px;border-bottom:1px solid rgba(0,0,0,0.1)}
+    .tab{padding:8px 16px;cursor:pointer;border-bottom:2px solid transparent}
+    .tab.active{border-bottom-color:var(--primary);color:var(--primary);font-weight:600}
+    
+    .notification{position:fixed;bottom:20px;right:20px;padding:12px 20px;background:var(--primary);color:white;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.2);display:none;z-index:1000}
+    .notification.show{display:block}
+    
+    .export-menu{position:relative;display:inline-block}
+    .export-dropdown{position:absolute;top:100%;right:0;background:var(--card);border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);display:none;z-index:50}
+    .export-dropdown.show{display:block}
+    .export-dropdown button{display:block;width:100%;text-align:left;padding:10px 16px;border:none;background:transparent;color:inherit;cursor:pointer}
+    .export-dropdown button:hover{background:var(--accent)}
+    
+    .loading{display:inline-block;width:20px;height:20px;border:3px solid rgba(255,255,255,0.3);border-radius:50%;border-top-color:white;animation:spin 1s ease-in-out infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
   </style>
 </head>
 <body data-theme="light">
+  <!-- Login Modal -->
   <div id="loginModal" class="modal-backdrop">
     <div class="modal fade-in">
       <h3 style="margin:0 0 8px 0;color:var(--primary)">Welcome — Crispy Chicken</h3>
@@ -104,9 +160,17 @@
           <option value="2025">2025 Only</option>
         </select>
 
-        <div class="actions">
-          <button id="exportCsv" title="Export CSV">Export CSV</button>
-          <button id="exportPdf" title="Export PDF">Export PDF</button>
+        <div class="export-menu">
+          <button id="exportBtn" class="btn-primary">
+            <i class="fas fa-download"></i> Export
+          </button>
+          <div id="exportDropdown" class="export-dropdown">
+            <button id="exportCsv"><i class="fas fa-file-csv"></i> Export CSV</button>
+            <button id="exportPdf"><i class="fas fa-file-pdf"></i> Export PDF</button>
+            <button id="exportExcel"><i class="fas fa-file-excel"></i> Export Excel</button>
+            <button id="exportJson"><i class="fas fa-file-code"></i> Export JSON</button>
+            <button id="saveImage"><i class="fas fa-image"></i> Save as Image</button>
+          </div>
         </div>
 
         <div class="controls">
@@ -116,30 +180,126 @@
       </div>
     </header>
 
+    <!-- KPI Cards -->
+    <div class="kpi-grid">
+      <div class="kpi-card fade-in">
+        <div class="kpi-label">Total 2024</div>
+        <div class="kpi-value" id="val2024">-</div>
+        <div class="kpi-change" id="kpi24sub"></div>
+      </div>
+      <div class="kpi-card fade-in success">
+        <div class="kpi-label">Total 2025</div>
+        <div class="kpi-value" id="val2025">-</div>
+        <div class="kpi-change" id="kpi25sub"></div>
+      </div>
+      <div class="kpi-card fade-in info">
+        <div class="kpi-label">Growth %</div>
+        <div class="kpi-value" id="growthVal">-</div>
+        <div class="kpi-change" id="growthSub"></div>
+      </div>
+      <div class="kpi-card fade-in warning">
+        <div class="kpi-label">Best Branch</div>
+        <div class="kpi-value" id="bestBranch">-</div>
+        <div class="kpi-change" id="bestSub"></div>
+      </div>
+    </div>
+
     <section class="grid">
-      <div class="card kpi fade-in"><h3>Total 2024</h3><div class="value" id="val2024">-</div><div class="small muted-small" id="kpi24sub"></div></div>
-      <div class="card kpi fade-in"><h3>Total 2025</h3><div class="value" id="val2025">-</div><div class="small muted-small" id="kpi25sub"></div></div>
-      <div class="card kpi fade-in"><h3>Growth %</h3><div class="value" id="growthVal">-</div><div class="small muted-small" id="growthSub"></div></div>
-      <div class="card kpi fade-in"><h3>Best Branch</h3><div class="value" id="bestBranch">-</div><div class="small muted-small" id="bestSub"></div></div>
-
-      <div class="card" style="grid-column:span 12"><h3>Branch Comparison</h3><canvas id="branchChart"></canvas></div>
-      <div class="card" style="grid-column:span 12"><h3>Ranking Chart</h3><canvas id="rankChart"></canvas></div>
-      <div class="card" style="grid-column:span 12"><h3>Monthly Trend</h3><canvas id="trendChart"></canvas></div>
-
+      <!-- Branch Comparison Chart -->
       <div class="card" style="grid-column:span 12">
-        <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <h3 style="margin:0">Branch Comparison</h3>
+          <div class="tabs">
+            <div class="tab active" data-chart="branch">Revenue</div>
+            <div class="tab" data-chart="growth">Growth</div>
+            <div class="tab" data-chart="market">Market Share</div>
+          </div>
+        </div>
+        <canvas id="branchChart"></canvas>
+      </div>
+
+      <!-- Ranking Chart -->
+      <div class="card" style="grid-column:span 6">
+        <h3 style="margin:0">Branch Rankings</h3>
+        <canvas id="rankChart"></canvas>
+      </div>
+
+      <!-- Trend Chart -->
+      <div class="card" style="grid-column:span 6">
+        <h3 style="margin:0">Monthly Trend</h3>
+        <canvas id="trendChart"></canvas>
+      </div>
+
+      <!-- Insights Section -->
+      <div class="card" style="grid-column:span 6">
+        <h3 style="margin:0">Key Insights</h3>
+        <div id="insightsContainer">
+          <div class="insight-card">
+            <div class="insight-title">
+              <i class="fas fa-lightbulb"></i> Loading insights...
+              <span class="insight-tag">Analyzing</span>
+            </div>
+            <div class="insight-content">Please wait while we analyze your data</div>
+          </div>
+        </div>
+        <button id="generateInsights" class="btn-primary" style="width:100%;margin-top:12px">
+          <i class="fas fa-sync-alt"></i> Generate Insights
+        </button>
+      </div>
+
+      <!-- Forecast Section -->
+      <div class="card" style="grid-column:span 6">
+        <h3 style="margin:0">Revenue Forecast</h3>
+        <div class="forecast-container">
+          <div class="forecast-header">
+            <span>Next 3 months projection</span>
+            <select id="forecastModel">
+              <option value="linear">Linear Trend</option>
+              <option value="seasonal">Seasonal Model</option>
+              <option value="moving">Moving Average</option>
+            </select>
+          </div>
+          <canvas id="forecastChart" style="height:200px"></canvas>
+          <div id="forecastDetails"></div>
+        </div>
+      </div>
+
+      <!-- Performance Table -->
+      <div class="card" style="grid-column:span 12">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
           <h3 style="margin:0">Branch Performance Table</h3>
           <div class="muted-small">Click header to sort — numbers are click-selectable</div>
         </div>
         <table id="perfTable"></table>
       </div>
+
+      <!-- Branch Comparison -->
+      <div class="card" style="grid-column:span 12">
+        <h3 style="margin:0">Branch Comparison</h3>
+        <div style="display:flex;gap:12px;margin-bottom:16px">
+          <select id="compareBranch1">
+            <option value="">Select Branch 1</option>
+          </select>
+          <select id="compareBranch2">
+            <option value="">Select Branch 2</option>
+          </select>
+          <button id="compareBtn" class="btn-primary">Compare</button>
+        </div>
+        <div id="comparisonContainer">
+          <canvas id="comparisonChart"></canvas>
+        </div>
+      </div>
     </section>
   </div>
 
-  <!-- libs -->
+  <!-- Notification -->
+  <div id="notification" class="notification">Data exported successfully!</div>
+
+  <!-- Libs -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <script>
   /* =========================
@@ -248,6 +408,19 @@
   });
   branchSelect.value = branches[0];
 
+  // populate comparison selects
+  const compareBranch1 = document.getElementById('compareBranch1');
+  const compareBranch2 = document.getElementById('compareBranch2');
+  branches.forEach(b=>{
+    const o1 = document.createElement('option');
+    o1.value = b; o1.textContent = b;
+    compareBranch1.appendChild(o1);
+    
+    const o2 = document.createElement('option');
+    o2.value = b; o2.textContent = b;
+    compareBranch2.appendChild(o2);
+  });
+
   // generate an inline SVG logo (initials + color)
   function makeLogoDataURL(name, size=64){
     const initials = name.split(' ').map(p=>p[0]).slice(0,2).join('').toUpperCase();
@@ -349,31 +522,93 @@
   /* =========================
      Charts (Chart.js)
      ========================= */
-  let branchChart, rankChart, trendChart;
+  let branchChart, rankChart, trendChart, forecastChart, comparisonChart;
+  let currentChartType = 'branch';
+  
   function renderCharts(){
     // destroy if exists
     if(branchChart) branchChart.destroy();
     if(rankChart) rankChart.destroy();
     if(trendChart) trendChart.destroy();
+    if(forecastChart) forecastChart.destroy();
+    if(comparisonChart) comparisonChart.destroy();
 
     // Branch comparison chart
     const ctx1 = document.getElementById('branchChart');
-    branchChart = new Chart(ctx1, {
-      type: 'bar',
-      data: {
-        labels: branches,
-        datasets: [
-          { label:'2024', data: totals24, borderRadius:6, barThickness:18, backgroundColor: branches.map(b=>makeChartColor(b,0.32)) },
-          { label:'2025', data: totals25, borderRadius:6, barThickness:18, backgroundColor: branches.map(b=>makeChartColor(b,0.86)) }
-        ]
-      },
-      options: {
-        responsive:true,
-        interaction:{mode:'index'},
-        plugins:{legend:{position:'top'}},
-        scales:{y:{ticks:{callback: v => v >= 1000 ? (v/1000)+'k' : v}}}
-      }
-    });
+    
+    if (currentChartType === 'branch') {
+      branchChart = new Chart(ctx1, {
+        type: 'bar',
+        data: {
+          labels: branches,
+          datasets: [
+            { label:'2024', data: totals24, borderRadius:6, barThickness:18, backgroundColor: branches.map(b=>makeChartColor(b,0.32)) },
+            { label:'2025', data: totals25, borderRadius:6, barThickness:18, backgroundColor: branches.map(b=>makeChartColor(b,0.86)) }
+          ]
+        },
+        options: {
+          responsive:true,
+          interaction:{mode:'index'},
+          plugins:{legend:{position:'top'}},
+          scales:{y:{ticks:{callback: v => v >= 1000 ? (v/1000)+'k' : v}}}
+        }
+      });
+    } else if (currentChartType === 'growth') {
+      branchChart = new Chart(ctx1, {
+        type: 'bar',
+        data: {
+          labels: branches,
+          datasets: [{
+            label: 'Growth %',
+            data: RAW.rows.map(r => growth(r[2], r[1])),
+            backgroundColor: RAW.rows.map(r => growth(r[2], r[1]) >= 0 ? makeChartColor('success', 0.8) : makeChartColor('danger', 0.8))
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: {
+              ticks: {
+                callback: v => v + '%'
+              }
+            }
+          }
+        }
+      });
+    } else if (currentChartType === 'market') {
+      const totalMarket25 = totals25.reduce((a, b) => a + b, 0);
+      branchChart = new Chart(ctx1, {
+        type: 'doughnut',
+        data: {
+          labels: branches,
+          datasets: [{
+            data: totals25,
+            backgroundColor: branches.map(b => makeChartColor(b, 0.8)),
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'right'
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const value = context.raw;
+                  const percentage = ((value / totalMarket25) * 100).toFixed(1);
+                  return `${context.label}: ${fmt(value)} (${percentage}%)`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
 
     // Ranking chart: horizontal bars sorted by 2025
     const sorted = [...RAW.rows].sort((a,b)=>b[1]-a[1]);
@@ -403,6 +638,153 @@
       },
       options:{responsive:true,plugins:{legend:{position:'top'}},scales:{y:{ticks:{callback:v => v>=1000 ? (v/1000)+'k' : v}}}}
     });
+
+    // Forecast chart
+    renderForecast();
+    
+    // Comparison chart (will be rendered when compare button is clicked)
+  }
+
+  // Forecast chart
+  function renderForecast() {
+    const model = document.getElementById('forecastModel').value;
+    const br = branchSelect.value;
+    const monthly = monthlyMap[br];
+    
+    // Simple forecast based on selected model
+    let forecast = [];
+    if (model === 'linear') {
+      // Simple linear projection based on trend
+      const trend = (monthly.m25[11] - monthly.m25[0]) / 11;
+      forecast = [
+        monthly.m25[11] + trend,
+        monthly.m25[11] + trend * 2,
+        monthly.m25[11] + trend * 3
+      ];
+    } else if (model === 'seasonal') {
+      // Seasonal projection (add seasonal variation)
+      const avgMonthly = monthly.m25.reduce((a, b) => a + b, 0) / 12;
+      forecast = [
+        avgMonthly * 1.1, // Slight increase for next Jan
+        avgMonthly * 1.15, // Slight increase for next Feb
+        avgMonthly * 1.2   // Slight increase for next Mar
+      ];
+    } else if (model === 'moving') {
+      // Moving average forecast
+      const avgLast3 = (monthly.m25[9] + monthly.m25[10] + monthly.m25[11]) / 3;
+      forecast = [
+        avgLast3,
+        avgLast3,
+        avgLast3
+      ];
+    }
+    
+    const forecastCtx = document.getElementById('forecastChart');
+    forecastChart = new Chart(forecastCtx, {
+      type: 'line',
+      data: {
+        labels: ['Jan 2026', 'Feb 2026', 'Mar 2026'],
+        datasets: [
+          {
+            label: 'Historical',
+            data: monthly.m25.slice(-3),
+            borderColor: makeChartColor(br, 0.86),
+            backgroundColor: makeChartColor(br, 0.2),
+            fill: true
+          },
+          {
+            label: 'Forecast',
+            data: forecast,
+            borderColor: makeChartColor('warning', 1),
+            borderDash: [5, 5],
+            pointBackgroundColor: makeChartColor('warning', 1),
+            pointRadius: 6
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'top'
+          }
+        },
+        scales: {
+          y: {
+            ticks: {
+              callback: v => v >= 1000 ? (v/1000)+'k' : v
+            }
+          }
+        }
+      }
+    });
+    
+    // Update forecast details
+    const forecastDetails = document.getElementById('forecastDetails');
+    forecastDetails.innerHTML = `
+      <div class="forecast-item">
+        <span>Projected Q1 2026 Revenue</span>
+        <span class="up">${fmt(forecast.reduce((a, b) => a + b, 0))} AED</span>
+      </div>
+      <div class="forecast-item">
+        <span>Monthly Average</span>
+        <span>${fmt(forecast.reduce((a, b) => a + b, 0) / 3)} AED</span>
+      </div>
+    `;
+  }
+
+  // Branch comparison
+  function renderComparison() {
+    const br1 = document.getElementById('compareBranch1').value;
+    const br2 = document.getElementById('compareBranch2').value;
+    
+    if (!br1 || !br2) return;
+    
+    const monthly1 = monthlyMap[br1];
+    const monthly2 = monthlyMap[br2];
+    
+    const comparisonCtx = document.getElementById('comparisonChart');
+    comparisonChart = new Chart(comparisonCtx, {
+      type: 'line',
+      data: {
+        labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+        datasets: [
+          {
+            label: br1 + ' - 2025',
+            data: monthly1.m25,
+            borderColor: makeChartColor(br1, 0.86),
+            backgroundColor: makeChartColor(br1, 0.2),
+            fill: true
+          },
+          {
+            label: br2 + ' - 2025',
+            data: monthly2.m25,
+            borderColor: makeChartColor(br2, 0.86),
+            backgroundColor: makeChartColor(br2, 0.2),
+            fill: true
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: {
+            display: true,
+            text: 'Monthly Comparison: ' + br1 + ' vs ' + br2
+          },
+          legend: {
+            position: 'top'
+          }
+        },
+        scales: {
+          y: {
+            ticks: {
+              callback: v => v >= 1000 ? (v/1000)+'k' : v
+            }
+          }
+        }
+      }
+    });
   }
 
   // helper: make chart color from branch name
@@ -423,7 +805,7 @@
   }
 
   /* =========================
-     Export: CSV & PDF
+     Export: CSV & PDF & Excel & JSON
      ========================= */
   function exportCSV(){
     // CSV includes monthly breakdown for all branches for 2024 & 2025
@@ -440,36 +822,327 @@
     const a = document.createElement('a');
     a.href = url; a.download = `crispy_chicken_export_${new Date().toISOString().slice(0,10)}.csv`;
     document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    showNotification('CSV exported successfully!');
+  }
+
+  function exportExcel() {
+    // Create a new workbook
+    const wb = XLSX.utils.book_new();
+    
+    // Create a worksheet for the summary data
+    const summaryData = RAW.rows.map(r => ({
+      Branch: r[0],
+      '2024 Total': r[2],
+      '2025 Total': r[1],
+      'Growth %': growth(r[2], r[1]).toFixed(2) + '%'
+    }));
+    const wsSummary = XLSX.utils.json_to_sheet(summaryData);
+    
+    // Create a worksheet for the monthly data
+    const monthlyData = [];
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    
+    // Header row
+    const header = ['Branch'];
+    months.forEach(month => {
+      header.push(month + ' 2024', month + ' 2025');
+    });
+    header.push('2024 Total', '2025 Total');
+    monthlyData.push(header);
+    
+    // Data rows
+    RAW.rows.forEach(r => {
+      const row = [r[0]];
+      const m = monthlyMap[r[0]];
+      
+      // Add monthly data for 2024 and 2025
+      months.forEach(month => {
+        row.push(m.m24[months.indexOf(month)]);
+        row.push(m.m25[months.indexOf(month)]);
+      });
+      
+      // Add totals
+      row.push(r[2], r[1]);
+      monthlyData.push(row);
+    });
+    
+    const wsMonthly = XLSX.utils.aoa_to_sheet(monthlyData);
+    
+    // Add worksheets to workbook
+    XLSX.utils.book_append_sheet(wb, wsSummary, 'Summary');
+    XLSX.utils.book_append_sheet(wb, wsMonthly, 'Monthly Data');
+    
+    // Generate and download file
+    XLSX.writeFile(wb, `crispy_chicken_report_${new Date().toISOString().slice(0,10)}.xlsx`);
+    showNotification('Excel exported successfully!');
+  }
+
+  function exportJSON() {
+    const reportData = {
+      metadata: {
+        generatedAt: new Date().toISOString(),
+        title: 'Crispy Chicken Performance Report',
+        period: '2024 vs 2025'
+      },
+      summary: RAW.rows.map(r => ({
+        branch: r[0],
+        total2024: r[2],
+        total2025: r[1],
+        growth: growth(r[2], r[1])
+      })),
+      monthlyData: {}
+    };
+    
+    // Add monthly data for each branch
+    RAW.rows.forEach(r => {
+      const branch = r[0];
+      const monthly = monthlyMap[branch];
+      reportData.monthlyData[branch] = {
+        2024: monthly.m24,
+        2025: monthly.m25
+      };
+    });
+    
+    // Create and download file
+    const jsonStr = JSON.stringify(reportData, null, 2);
+    const blob = new Blob([jsonStr], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `crispy_chicken_report_${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    showNotification('JSON exported successfully!');
   }
 
   async function exportPDF(){
-    // capture dashboard element and produce PDF with two pages: overview image + table text
+    // capture dashboard element and produce PDF with multiple pages
     const dashboard = document.getElementById('dashboard');
     // temporarily expand charts for better capture
     const origWidth = dashboard.style.width;
     dashboard.style.width = '1200px';
-    // capture
-    const canvas = await html2canvas(dashboard, {scale:1.6, backgroundColor: getComputedStyle(document.body).backgroundColor});
-    dashboard.style.width = origWidth;
-    const imgData = canvas.toDataURL('image/jpeg',0.9);
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF('landscape', 'pt', 'a4');
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
-    // add image scaled
-    pdf.addImage(imgData, 'JPEG', 12, 12, pdfWidth-24, (canvas.height * (pdfWidth-24) / canvas.width));
-    // add second page with CSV-like summary
-    pdf.addPage();
-    pdf.setFontSize(12);
-    pdf.text('Branch summary (2024 vs 2025)', 20, 30);
-    let y = 50;
-    RAW.rows.forEach(r=>{
-      const line = `${r[0]} — 2024: ${fmt(r[2])}, 2025: ${fmt(r[1])}, Growth: ${growth(r[2], r[1]).toFixed(1)}%`;
-      if(y > pdfHeight - 40){ pdf.addPage(); y = 40; }
-      pdf.text(line, 20, y);
-      y += 16;
+    
+    // Show loading indicator
+    const loading = document.createElement('div');
+    loading.style.position = 'fixed';
+    loading.style.top = '50%';
+    loading.style.left = '50%';
+    loading.style.transform = 'translate(-50%, -50%)';
+    loading.style.padding = '20px';
+    loading.style.background = 'rgba(255,255,255,0.9)';
+    loading.style.borderRadius = '8px';
+    loading.style.zIndex = '1000';
+    loading.innerHTML = '<div class="loading"></div><div style="margin-top:10px;text-align:center">Generating PDF...</div>';
+    document.body.appendChild(loading);
+    
+    try {
+      // capture
+      const canvas = await html2canvas(dashboard, {scale:1.6, backgroundColor: getComputedStyle(document.body).backgroundColor});
+      dashboard.style.width = origWidth;
+      
+      // Remove loading indicator
+      document.body.removeChild(loading);
+      
+      const imgData = canvas.toDataURL('image/jpeg',0.9);
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF('landscape', 'pt', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      
+      // Add title page
+      pdf.setFontSize(20);
+      pdf.text('Crispy Chicken Performance Report', 20, 40);
+      pdf.setFontSize(12);
+      pdf.text(`Generated: ${new Date().toLocaleDateString()}`, 20, 60);
+      pdf.text(`Period: 2024 vs 2025`, 20, 80);
+      
+      // Add summary data
+      pdf.setFontSize(14);
+      pdf.text('Summary', 20, 110);
+      pdf.setFontSize(10);
+      let y = 130;
+      RAW.rows.forEach(r => {
+        const line = `${r[0]} — 2024: ${fmt(r[2])}, 2025: ${fmt(r[1])}, Growth: ${growth(r[2], r[1]).toFixed(1)}%`;
+        if(y > pdfHeight - 40){ pdf.addPage(); y = 40; }
+        pdf.text(line, 20, y);
+        y += 16;
+      });
+      
+      // Add second page with dashboard image
+      pdf.addPage();
+      pdf.addImage(imgData, 'JPEG', 12, 12, pdfWidth-24, (canvas.height * (pdfWidth-24) / canvas.width));
+      
+      // Add third page with detailed analysis
+      pdf.addPage();
+      pdf.setFontSize(14);
+      pdf.text('Detailed Analysis', 20, 40);
+      pdf.setFontSize(10);
+      y = 60;
+      
+      // Add insights
+      const insights = generateInsights();
+      insights.forEach(insight => {
+        pdf.setFontSize(12);
+        pdf.text(insight.title, 20, y);
+        y += 10;
+        pdf.setFontSize(10);
+        const lines = pdf.splitTextToSize(insight.description, pdfWidth - 40);
+        lines.forEach(line => {
+          pdf.text(line, 20, y);
+          y += 6;
+        });
+        y += 10;
+      });
+      
+      // Save PDF
+      pdf.save(`crispy_chicken_dashboard_${new Date().toISOString().slice(0,10)}.pdf`);
+      showNotification('PDF exported successfully!');
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      document.body.removeChild(loading);
+      showNotification('Error generating PDF. Please try again.');
+    }
+  }
+
+  function saveAsImage() {
+    const dashboard = document.getElementById('dashboard');
+    
+    // Show loading indicator
+    const loading = document.createElement('div');
+    loading.style.position = 'fixed';
+    loading.style.top = '50%';
+    loading.style.left = '50%';
+    loading.style.transform = 'translate(-50%, -50%)';
+    loading.style.padding = '20px';
+    loading.style.background = 'rgba(255,255,255,0.9)';
+    loading.style.borderRadius = '8px';
+    loading.style.zIndex = '1000';
+    loading.innerHTML = '<div class="loading"></div><div style="margin-top:10px;text-align:center">Saving image...</div>';
+    document.body.appendChild(loading);
+    
+    html2canvas(dashboard, {scale:2, backgroundColor: getComputedStyle(document.body).backgroundColor})
+      .then(canvas => {
+        // Remove loading indicator
+        document.body.removeChild(loading);
+        
+        // Create download link
+        const link = document.createElement('a');
+        link.download = `crispy_chicken_dashboard_${new Date().toISOString().slice(0,10)}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        
+        showNotification('Image saved successfully!');
+      })
+      .catch(error => {
+        console.error('Error saving image:', error);
+        document.body.removeChild(loading);
+        showNotification('Error saving image. Please try again.');
+      });
+  }
+
+  /* =========================
+     Generate Insights
+     ========================= */
+  function generateInsights() {
+    const insights = [];
+    
+    // Overall performance analysis
+    const totalSales2024 = totals24.reduce((a, b) => a + b, 0);
+    const totalSales2025 = totals25.reduce((a, b) => a + b, 0);
+    const overallGrowth = growth(totalSales2024, totalSales2025);
+    
+    if (overallGrowth > 0) {
+      insights.push({
+        title: 'Positive Overall Growth',
+        description: `Total sales increased by ${overallGrowth.toFixed(1)}% from 2024 to 2025, indicating strong business performance across all branches.`
+      });
+    } else {
+      insights.push({
+        title: 'Sales Decline',
+        description: `Total sales decreased by ${Math.abs(overallGrowth).toFixed(1)}% from 2024 to 2025. Review strategies to reverse this trend.`
+      });
+    }
+    
+    // Top performing branch
+    const topBranchIndex = totals25.indexOf(Math.max(...totals25));
+    const topBranch = branches[topBranchIndex];
+    const topBranchGrowth = growth(totals24[topBranchIndex], totals25[topBranchIndex]);
+    
+    insights.push({
+      title: 'Top Performing Branch',
+      description: `${topBranch} leads with ${fmt(totals25[topBranchIndex])} AED in 2025, showing ${topBranchGrowth > 0 ? 'positive' : 'negative'} growth of ${Math.abs(topBranchGrowth).toFixed(1)}%.`
     });
-    pdf.save(`crispy_chicken_dashboard_${new Date().toISOString().slice(0,10)}.pdf`);
+    
+    // Fastest growing branch
+    const growthRates = RAW.rows.map(r => growth(r[2], r[1]));
+    const maxGrowthIndex = growthRates.indexOf(Math.max(...growthRates));
+    const maxGrowthBranch = branches[maxGrowthIndex];
+    const maxGrowthRate = growthRates[maxGrowthIndex];
+    
+    insights.push({
+      title: 'Fastest Growing Branch',
+      description: `${maxGrowthBranch} showed the highest growth rate of ${maxGrowthRate.toFixed(1)}%, indicating successful strategies or market expansion.`
+    });
+    
+    // Underperforming branch
+    const minGrowthIndex = growthRates.indexOf(Math.min(...growthRates));
+    const minGrowthBranch = branches[minGrowthIndex];
+    const minGrowthRate = growthRates[minGrowthIndex];
+    
+    if (minGrowthRate < 0) {
+      insights.push({
+        title: 'Branch Requiring Attention',
+        description: `${minGrowthBranch} experienced a decline of ${Math.abs(minGrowthRate).toFixed(1)}%. Immediate action is needed to address this underperformance.`
+      });
+    }
+    
+    // Seasonal analysis
+    const monthlyTotals2025 = Array(12).fill(0);
+    const monthlyTotals2024 = Array(12).fill(0);
+    
+    RAW.rows.forEach(r => {
+      const branch = r[0];
+      const monthly = monthlyMap[branch];
+      
+      for (let i = 0; i < 12; i++) {
+        monthlyTotals2025[i] += monthly.m25[i];
+        monthlyTotals2024[i] += monthly.m24[i];
+      }
+    });
+    
+    // Find best and worst months
+    const bestMonthIndex = monthlyTotals2025.indexOf(Math.max(...monthlyTotals2025));
+    const worstMonthIndex = monthlyTotals2025.indexOf(Math.min(...monthlyTotals2025));
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
+    insights.push({
+      title: 'Peak Performance Month',
+      description: `${months[bestMonthIndex]} was the strongest month with ${fmt(monthlyTotals2025[bestMonthIndex])} AED in sales. Plan targeted promotions for this period.`
+    });
+    
+    insights.push({
+      title: 'Lowest Performance Month',
+      description: `${months[worstMonthIndex]} showed the lowest sales at ${fmt(monthlyTotals2025[worstMonthIndex])} AED. Investigate causes and implement improvement strategies.`
+    });
+    
+    return insights;
+  }
+
+  function displayInsights() {
+    const insights = generateInsights();
+    const insightsContainer = document.getElementById('insightsContainer');
+    
+    insightsContainer.innerHTML = insights.map(insight => `
+      <div class="insight-card">
+        <div class="insight-title">
+          <i class="fas fa-lightbulb"></i> ${insight.title}
+          <span class="insight-tag">Insight</span>
+        </div>
+        <div class="insight-content">${insight.description}</div>
+      </div>
+    `).join('');
   }
 
   /* =========================
@@ -490,11 +1163,45 @@
     yearSelect.value = 'all';
     currentSort = {col:'2025 (AED)',dir:'desc'};
     updateKPIs(); buildTable(); renderCharts();
+    showNotification('Dashboard reset to default view');
   };
 
   // export buttons
-  document.getElementById('exportCsv').onclick = exportCSV;
-  document.getElementById('exportPdf').onclick = exportPDF;
+  document.getElementById('exportBtn').onclick = function() {
+    document.getElementById('exportDropdown').classList.toggle('show');
+  };
+
+  document.getElementById('exportCsv').onclick = function() {
+    exportCSV();
+    document.getElementById('exportDropdown').classList.remove('show');
+  };
+
+  document.getElementById('exportPdf').onclick = function() {
+    exportPDF();
+    document.getElementById('exportDropdown').classList.remove('show');
+  };
+
+  document.getElementById('exportExcel').onclick = function() {
+    exportExcel();
+    document.getElementById('exportDropdown').classList.remove('show');
+  };
+
+  document.getElementById('exportJson').onclick = function() {
+    exportJSON();
+    document.getElementById('exportDropdown').classList.remove('show');
+  };
+
+  document.getElementById('saveImage').onclick = function() {
+    saveAsImage();
+    document.getElementById('exportDropdown').classList.remove('show');
+  };
+
+  // Close dropdown when clicking outside
+  window.onclick = function(event) {
+    if (!event.target.matches('#exportBtn') && !event.target.closest('#exportDropdown')) {
+      document.getElementById('exportDropdown').classList.remove('show');
+    }
+  }
 
   // login demo: hide modal and show dashboard
   document.getElementById('loginBtn').onclick = ()=>{
@@ -507,29 +1214,93 @@
     buildTable();
     renderCharts();
   };
+  
+  // when year selection changes
   yearSelect.onchange = ()=>{
     // allow toggling datasets: for now, filter charts to only show selected year or both
     const val = yearSelect.value;
     if(val === '2024'){
       // hide 2025 dataset in branchChart and trendChart
-      branchChart.data.datasets[0].hidden = false; // 2024
-      branchChart.data.datasets[1].hidden = true;  // 2025
-      trendChart.data.datasets[0].hidden = false;
-      trendChart.data.datasets[1].hidden = true;
+      if (branchChart) {
+        branchChart.data.datasets[0].hidden = false; // 2024
+        branchChart.data.datasets[1].hidden = true;  // 2025
+        branchChart.update();
+      }
+      if (trendChart) {
+        trendChart.data.datasets[0].hidden = false;
+        trendChart.data.datasets[1].hidden = true;
+        trendChart.update();
+      }
     } else if(val === '2025'){
-      branchChart.data.datasets[0].hidden = true;
-      branchChart.data.datasets[1].hidden = false;
-      trendChart.data.datasets[0].hidden = true;
-      trendChart.data.datasets[1].hidden = false;
+      if (branchChart) {
+        branchChart.data.datasets[0].hidden = true;
+        branchChart.data.datasets[1].hidden = false;
+        branchChart.update();
+      }
+      if (trendChart) {
+        trendChart.data.datasets[0].hidden = true;
+        trendChart.data.datasets[1].hidden = false;
+        trendChart.update();
+      }
     } else {
-      branchChart.data.datasets[0].hidden = false;
-      branchChart.data.datasets[1].hidden = false;
-      trendChart.data.datasets[0].hidden = false;
-      trendChart.data.datasets[1].hidden = false;
+      if (branchChart) {
+        branchChart.data.datasets[0].hidden = false;
+        branchChart.data.datasets[1].hidden = false;
+        branchChart.update();
+      }
+      if (trendChart) {
+        trendChart.data.datasets[0].hidden = false;
+        trendChart.data.datasets[1].hidden = false;
+        trendChart.update();
+      }
     }
-    branchChart.update();
-    trendChart.update();
   };
+  
+  // Tab switching for branch chart
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+      currentChartType = this.getAttribute('data-chart');
+      renderCharts();
+    });
+  });
+  
+  // Forecast model change
+  document.getElementById('forecastModel').addEventListener('change', function() {
+    renderForecast();
+  });
+  
+  // Compare branches
+  document.getElementById('compareBtn').addEventListener('click', function() {
+    renderComparison();
+  });
+
+  // Generate insights button
+  document.getElementById('generateInsights').addEventListener('click', function() {
+    // Show loading state
+    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+    this.disabled = true;
+    
+    // Simulate processing time
+    setTimeout(() => {
+      displayInsights();
+      this.innerHTML = '<i class="fas fa-sync-alt"></i> Generate Insights';
+      this.disabled = false;
+      showNotification('Insights generated successfully!');
+    }, 1500);
+  });
+
+  // Show notification
+  function showNotification(message) {
+    const notification = document.getElementById('notification');
+    notification.textContent = message;
+    notification.classList.add('show');
+    
+    setTimeout(() => {
+      notification.classList.remove('show');
+    }, 3000);
+  }
 
   /* =========================
      INIT
@@ -537,6 +1308,7 @@
   updateKPIs();
   buildTable();
   renderCharts();
+  displayInsights();
 
   // small UX: click value to copy
   document.body.addEventListener('click', e=>{
