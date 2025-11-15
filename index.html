@@ -3,29 +3,557 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Self-Delivery vs Online Web Dashboard</title>
+  <title>Crispy Chicken — Pro Dashboard (Enhanced)</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg: #f0f4f8;
-      --card: #ffffff;
-      --muted: #6b7280;
-      --green: #10b981;
-      --red: #ef4444;
-      --accent: #3b82f6;
-      --glass: rgba(0,0,0,0.03);
+    :root{
+      --bg:#f5f7fb; --card:#fff; --muted:#64748b; --primary:#4f46e5;
+      --success:#16a34a; --danger:#dc2626; --glass: rgba(255,255,255,0.6);
+      --accent:#e6eefc;
+    }
+    [data-theme="dark"]{
+      --bg:#0b1220; --card:#0f1724; --muted:#9aa9bf; --primary:#7c3aed;
+      --success:#10b981; --danger:#fb7185; --glass: rgba(255,255,255,0.04);
+      --accent:#0b122666;
     }
 
-    body { margin:0; font-family: Inter, sans-serif; background: var(--bg); color: #0f172a; }
-    .container { max-width: 1200px; margin: 24px auto; padding: 20px; }
-    h1 { font-size: 22px; margin-bottom: 8px; }
-    .grid { display: grid; grid-template-columns: repeat(12,1fr); gap:16px; }
-    .card { background: var(--card); border-radius:12px; padding:16px; box-shadow:0 2px 8px rgba(0,0,0,0.05); }
-    .kpi { grid-column: span 3; text-align:center; }
-    .kpi .value { font-size: 22px; font-weight:600; margin-top:6px; }
-    .trend { font-size:14px; margin-top:4px; }
-    canvas { width:100% !important; height:320px !important; }
-    .full { grid-column: span 12; }
-    .wide { grid-column: span 6; }
-    .summary { margin-top:12px; display:flex; gap:12px; flex-wrap:wrap; }
-    .summary
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;color:var(--muted);transition:background .25s,color .25s}
+    .container{max-width:1300px;margin:24px auto;padding:18px}
+    header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;gap:12px}
+    h1{margin:0;font-size:20px;color:var(--primary);font-weight:700}
+    .controls{display:flex;gap:10px;align-items:center}
+    select,button,input{padding:8px 12px;border-radius:10px;border:1px solid #cbd5e1;background:var(--card);color:inherit}
+    .icon-btn{display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+    .card{background:var(--card);padding:14px;border-radius:12px;box-shadow:0 6px 18px rgba(2,6,23,0.12);transition:transform .18s,box-shadow .18s}
+    .card:hover{transform:translateY(-4px);box-shadow:0 10px 28px rgba(2,6,23,0.16)}
+    .kpi{grid-column:span 3;border-left:6px solid var(--primary)}
+    .kpi h3{margin:0;font-size:12px;color:var(--muted)}
+    .kpi .value{font-size:24px;font-weight:700;margin-top:6px;color:inherit}
+    .small{font-size:12px;color:var(--muted)}
+    canvas{width:100%!important;max-height:360px}
+    table{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px;color:inherit}
+    th,td{padding:8px;border-bottom:1px solid rgba(0,0,0,0.06);text-align:left}
+    th{font-weight:600;color:var(--muted);font-size:12px}
+    .up{color:var(--success);font-weight:700}
+    .down{color:var(--danger);font-weight:700}
+    .controls-right{display:flex;gap:8px;align-items:center}
+    .logo-small{width:36px;height:36px;border-radius:8px;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.04);display:inline-block;vertical-align:middle}
+    .top-row{display:flex;gap:12px;align-items:center}
+    .btn-primary{background:var(--primary);color:white;border:none}
+    .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.04)}
+    .muted-small{font-size:12px;color:var(--muted)}
+    .actions{display:flex;gap:8px}
+    .center{display:flex;align-items:center;gap:10px}
+    /* login modal */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(2,6,23,0.6);display:flex;align-items:center;justify-content:center;z-index:80}
+    .modal{background:var(--card);padding:20px;border-radius:12px;min-width:320px;box-shadow:0 12px 40px rgba(2,6,23,0.4)}
+    .form-row{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+    .small-link{font-size:12px;color:var(--primary);cursor:pointer}
+    /* responsive */
+    @media (max-width:1000px){
+      .kpi{grid-column:span 6}
+      .grid{grid-template-columns:repeat(6,1fr)}
+    }
+    @media (max-width:600px){
+      header{flex-direction:column;align-items:flex-start;gap:10px}
+      .grid{grid-template-columns:repeat(1,1fr)}
+      .kpi{grid-column:span 1}
+    }
+    /* subtle animations */
+    .fade-in{animation:fadeIn .45s ease both}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  </style>
+</head>
+<body data-theme="light">
+  <div id="loginModal" class="modal-backdrop">
+    <div class="modal fade-in">
+      <h3 style="margin:0 0 8px 0;color:var(--primary)">Welcome — Crispy Chicken</h3>
+      <div class="form-row">
+        <label class="small">Email</label>
+        <input id="loginEmail" placeholder="you@company.com" />
+      </div>
+      <div class="form-row">
+        <label class="small">Password</label>
+        <input id="loginPass" type="password" placeholder="password" />
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px">
+        <button id="loginBtn" class="btn-primary">Sign in</button>
+        <div class="small muted-small">Demo login — any credentials accepted</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container" id="dashboard">
+    <header>
+      <div class="top-row">
+        <h1>Crispy Chicken — Pro Dashboard</h1>
+        <div class="muted-small" style="margin-left:8px">Professional Performance • 2024 vs 2025</div>
+      </div>
+
+      <div class="controls-right">
+        <div class="center">
+          <img id="branchLogo" class="logo-small" alt="logo" />
+          <select id="branchSelect"></select>
+        </div>
+
+        <select id="yearSelect">
+          <option value="all">2024 vs 2025</option>
+          <option value="2024">2024 Only</option>
+          <option value="2025">2025 Only</option>
+        </select>
+
+        <div class="actions">
+          <button id="exportCsv" title="Export CSV">Export CSV</button>
+          <button id="exportPdf" title="Export PDF">Export PDF</button>
+        </div>
+
+        <div class="controls">
+          <button id="themeToggle" class="icon-btn">🌙</button>
+          <button id="resetBtn">Reset</button>
+        </div>
+      </div>
+    </header>
+
+    <section class="grid">
+      <div class="card kpi fade-in"><h3>Total 2024</h3><div class="value" id="val2024">-</div><div class="small muted-small" id="kpi24sub"></div></div>
+      <div class="card kpi fade-in"><h3>Total 2025</h3><div class="value" id="val2025">-</div><div class="small muted-small" id="kpi25sub"></div></div>
+      <div class="card kpi fade-in"><h3>Growth %</h3><div class="value" id="growthVal">-</div><div class="small muted-small" id="growthSub"></div></div>
+      <div class="card kpi fade-in"><h3>Best Branch</h3><div class="value" id="bestBranch">-</div><div class="small muted-small" id="bestSub"></div></div>
+
+      <div class="card" style="grid-column:span 12"><h3>Branch Comparison</h3><canvas id="branchChart"></canvas></div>
+      <div class="card" style="grid-column:span 12"><h3>Ranking Chart</h3><canvas id="rankChart"></canvas></div>
+      <div class="card" style="grid-column:span 12"><h3>Monthly Trend</h3><canvas id="trendChart"></canvas></div>
+
+      <div class="card" style="grid-column:span 12">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <h3 style="margin:0">Branch Performance Table</h3>
+          <div class="muted-small">Click header to sort — numbers are click-selectable</div>
+        </div>
+        <table id="perfTable"></table>
+      </div>
+    </section>
+  </div>
+
+  <!-- libs -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
+  <script>
+  /* =========================
+     DATA (rows: [branch, 2025 total, 2024 total])
+     NOTE: We now generate deterministic monthly data per branch so trend chart and exports show "real" monthly numbers.
+     ========================= */
+  const RAW = {
+    rows:[
+      ['Hamdan St',7444537,8297881],
+      ['Khaldia',6039662,6293740],
+      ['Shabiya 11',6510384,5502957],
+      ['Muroor',5125737,4767127],
+      ['Al Barsha',6257407,5753883],
+      ['Al Satwa',4774601,2631356],
+      ['Elctria',7637929,2830175],
+      ['Al Rigga',442475,0]
+    ]
+  };
+
+  // utilities
+  const branches = RAW.rows.map(r=>r[0]);
+  const totals25 = RAW.rows.map(r=>r[1]);
+  const totals24 = RAW.rows.map(r=>r[2]);
+
+  function fmt(n){ return Number(n).toLocaleString(); }
+  function growth(a,b){ 
+    if (a === 0) return b === 0 ? 0 : 100;
+    return ((b - a) / a) * 100;
+  }
+
+  /* Deterministic pseudo-random generator from string (for monthly data) */
+  function seedFromString(s){
+    let h=2166136261 >>> 0;
+    for(let i=0;i<s.length;i++){
+      h ^= s.charCodeAt(i);
+      h += (h<<1) + (h<<4) + (h<<7) + (h<<8) + (h<<24);
+    }
+    return h >>> 0;
+  }
+  function seededRandom(seed){
+    // simple xorshift
+    let x = seed || 123456789;
+    return function(){
+      x ^= x << 13;
+      x ^= x >>> 17;
+      x ^= x << 5;
+      return ((x >>> 0) % 1000000) / 1000000;
+    };
+  }
+
+  /* Build deterministic monthly arrays for 2024 & 2025 for each branch.
+     We scale monthly totals so they sum to the provided totals in RAW.rows.
+  */
+  function buildMonthlyFor(branch, total2025, total2024){
+    const seed = seedFromString(branch);
+    const rnd = seededRandom(seed);
+    // generate base monthly weights
+    const months = 12;
+    const weights25 = Array.from({length:months}, ()=>0);
+    const weights24 = Array.from({length:months}, ()=>0);
+    for(let i=0;i<months;i++){
+      // seasonal pattern + random
+      const season = 1 + 0.08*Math.sin((i/12)*Math.PI*2) + 0.06*Math.cos((i/12)*Math.PI*3);
+      weights25[i] = 0.7 + rnd()*1.4 + season;
+      weights24[i] = 0.6 + rnd()*1.6 + season*0.95;
+    }
+    // normalize and scale to totals
+    const sum25 = weights25.reduce((a,b)=>a+b,0);
+    const sum24 = weights24.reduce((a,b)=>a+b,0);
+    const m25 = weights25.map(w => Math.round((w/sum25) * total2025));
+    const m24 = weights24.map(w => Math.round((w/sum24) * total2024));
+    // small adjustment to match totals exactly
+    function adjust(arr, target){
+      let diff = target - arr.reduce((a,b)=>a+b,0);
+      let i=0;
+      while(diff!==0){
+        arr[i%arr.length]+= diff>0 ? 1 : -1;
+        diff += diff>0 ? -1 : 1;
+        i++;
+      }
+      return arr;
+    }
+    return {m25: adjust(m25, total2025), m24: adjust(m24, total2024)};
+  }
+
+  // Build monthly dataset map
+  const monthlyMap = {};
+  RAW.rows.forEach(r=>{
+    const branch = r[0];
+    const totals = buildMonthlyFor(branch, r[1], r[2]);
+    monthlyMap[branch] = totals;
+  });
+
+  /* =========================
+     UI Elements
+     ========================= */
+  const branchSelect = document.getElementById('branchSelect');
+  const branchLogo = document.getElementById('branchLogo');
+  const yearSelect = document.getElementById('yearSelect');
+
+  // populate branch select
+  branches.forEach(b=>{
+    const o = document.createElement('option');
+    o.value = b; o.textContent = b;
+    branchSelect.appendChild(o);
+  });
+  branchSelect.value = branches[0];
+
+  // generate an inline SVG logo (initials + color)
+  function makeLogoDataURL(name, size=64){
+    const initials = name.split(' ').map(p=>p[0]).slice(0,2).join('').toUpperCase();
+    const colors = ['#4f46e5','#10b981','#ef4444','#f59e0b','#06b6d4','#8b5cf6','#f97316','#0ea5a4'];
+    const idx = seedFromString(name) % colors.length;
+    const bg = colors[idx];
+    const fg = '#fff';
+    const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size}'>
+      <rect width='100%' height='100%' rx='12' fill='${bg}'/>
+      <text x='50%' y='50%' font-size='28' fill='${fg}' font-family='Inter,Helvetica,Arial' dominant-baseline='middle' text-anchor='middle' font-weight='700'>${initials}</text>
+    </svg>`;
+    return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+  }
+
+  // set initial logo
+  branchLogo.src = makeLogoDataURL(branchSelect.value);
+
+  /* =========================
+     KPIs + Table + Charts
+     ========================= */
+  const elVal24 = document.getElementById('val2024');
+  const elVal25 = document.getElementById('val2025');
+  const elGrowth = document.getElementById('growthVal');
+  const elBest = document.getElementById('bestBranch');
+  const kpi24sub = document.getElementById('kpi24sub');
+  const kpi25sub = document.getElementById('kpi25sub');
+  const growthSub = document.getElementById('growthSub');
+  const bestSub = document.getElementById('bestSub');
+
+  function updateKPIs(){
+    const br = branchSelect.value;
+    const idx = branches.indexOf(br);
+    const t24 = totals24[idx] || 0;
+    const t25 = totals25[idx] || 0;
+    elVal24.textContent = fmt(t24);
+    elVal25.textContent = fmt(t25);
+
+    const g = growth(t24, t25);
+    elGrowth.textContent = (g>0 ? '🔼 ':'🔻 ') + Math.abs(g).toFixed(1) + '%';
+    elGrowth.className = g>=0 ? 'up' : 'down';
+    kpi24sub.textContent = 'Sum of 12 months (2024)';
+    kpi25sub.textContent = 'Sum of 12 months (2025)';
+    growthSub.textContent = `(${ (t25 - t24).toLocaleString() } AED change)`;
+
+    // best branch
+    const maxIdx = totals25.indexOf(Math.max(...totals25));
+    elBest.textContent = branches[maxIdx];
+    bestSub.textContent = `Top by 2025 revenue: ${fmt(totals25[maxIdx])}`;
+    // update branch logo
+    branchLogo.src = makeLogoDataURL(br);
+  }
+
+  // Table
+  const perfTable = document.getElementById('perfTable');
+  let currentSort = {col:'2025',dir:'desc'}; // default sort
+  function buildTable(){
+    const headers = ['Branch','2024 (AED)','2025 (AED)','Growth %'];
+    let html = `<thead><tr>`;
+    headers.forEach(h=>{
+      html += `<th data-col="${h}" style="cursor:pointer">${h}</th>`;
+    });
+    html += `</tr></thead><tbody>`;
+    const rows = RAW.rows.map(r=>{
+      const g = growth(r[2], r[1]);
+      return {branch:r[0],t24:r[2],t25:r[1],g};
+    });
+
+    // sort
+    rows.sort((a,b)=>{
+      if(currentSort.col==='2025 (AED)') return currentSort.dir==='desc' ? b.t25 - a.t25 : a.t25 - b.t25;
+      if(currentSort.col==='2024 (AED)') return currentSort.dir==='desc' ? b.t24 - a.t24 : a.t24 - b.t24;
+      if(currentSort.col==='Growth %') return currentSort.dir==='desc' ? b.g - a.g : a.g - b.g;
+      return currentSort.dir==='desc' ? b.t25 - a.t25 : a.t25 - b.t25;
+    });
+
+    rows.forEach(r=>{
+      html += `<tr>
+        <td style="display:flex;gap:8px;align-items:center"><img src="${makeLogoDataURL(r.branch,36)}" style="width:36px;height:36px;border-radius:8px" /> ${r.branch}</td>
+        <td>${fmt(r.t24)}</td>
+        <td>${fmt(r.t25)}</td>
+        <td class="${r.g>=0 ? 'up':'down'}">${r.g.toFixed(1)}%</td>
+      </tr>`;
+    });
+    html += `</tbody>`;
+    perfTable.innerHTML = html;
+
+    // attach header click events for sorting
+    const ths = perfTable.querySelectorAll('th');
+    ths.forEach(th=>{
+      th.onclick = ()=>{
+        const col = th.getAttribute('data-col');
+        if(currentSort.col === col) currentSort.dir = currentSort.dir === 'desc' ? 'asc' : 'desc';
+        else { currentSort.col = col; currentSort.dir='desc'; }
+        buildTable();
+      };
+    });
+  }
+
+  /* =========================
+     Charts (Chart.js)
+     ========================= */
+  let branchChart, rankChart, trendChart;
+  function renderCharts(){
+    // destroy if exists
+    if(branchChart) branchChart.destroy();
+    if(rankChart) rankChart.destroy();
+    if(trendChart) trendChart.destroy();
+
+    // Branch comparison chart
+    const ctx1 = document.getElementById('branchChart');
+    branchChart = new Chart(ctx1, {
+      type: 'bar',
+      data: {
+        labels: branches,
+        datasets: [
+          { label:'2024', data: totals24, borderRadius:6, barThickness:18, backgroundColor: branches.map(b=>makeChartColor(b,0.32)) },
+          { label:'2025', data: totals25, borderRadius:6, barThickness:18, backgroundColor: branches.map(b=>makeChartColor(b,0.86)) }
+        ]
+      },
+      options: {
+        responsive:true,
+        interaction:{mode:'index'},
+        plugins:{legend:{position:'top'}},
+        scales:{y:{ticks:{callback: v => v >= 1000 ? (v/1000)+'k' : v}}}
+      }
+    });
+
+    // Ranking chart: horizontal bars sorted by 2025
+    const sorted = [...RAW.rows].sort((a,b)=>b[1]-a[1]);
+    rankChart = new Chart(document.getElementById('rankChart'), {
+      type: 'bar',
+      data: {
+        labels: sorted.map(r=>r[0]),
+        datasets: [{ label:'2025 Revenue', data: sorted.map(r=>r[1]), barThickness:14, backgroundColor: sorted.map(r=>makeChartColor(r[0],0.7)) }]
+      },
+      options: {
+        indexAxis:'y', responsive:true, plugins:{legend:{display:false}},
+        scales:{x:{ticks:{callback: v => v >= 1000 ? (v/1000)+'k' : v}}}
+      }
+    });
+
+    // Trend chart: show selected branch monthly data lines for 2024 & 2025
+    const br = branchSelect.value;
+    const monthly = monthlyMap[br];
+    trendChart = new Chart(document.getElementById('trendChart'), {
+      type:'line',
+      data:{
+        labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+        datasets:[
+          { label:'2024', data: monthly.m24, tension:0.32, pointRadius:4, borderWidth:2, fill:true, backgroundColor: makeGradient('2024'), borderColor: makeChartColor(br,0.86) },
+          { label:'2025', data: monthly.m25, tension:0.32, pointRadius:4, borderWidth:2, fill:false, borderDash:[4,4], borderColor: makeChartColor(br,1) }
+        ]
+      },
+      options:{responsive:true,plugins:{legend:{position:'top'}},scales:{y:{ticks:{callback:v => v>=1000 ? (v/1000)+'k' : v}}}}
+    });
+  }
+
+  // helper: make chart color from branch name
+  function makeChartColor(name, alpha=1){
+    const colors = ['63,81,181','16,185,129','239,68,68','245,158,11','6,182,212','139,92,246','249,115,22','14,165,164'];
+    const idx = seedFromString(name) % colors.length;
+    return `rgba(${colors[idx]},${alpha})`;
+  }
+
+  function makeGradient(year){
+    // gradient for trend fill
+    const canvas = document.getElementById('trendChart');
+    const ctx = canvas.getContext('2d');
+    const g = ctx.createLinearGradient(0,0,0,200);
+    if(year==='2024'){ g.addColorStop(0, 'rgba(79,70,229,0.12)'); g.addColorStop(1, 'rgba(79,70,229,0.01)'); }
+    else { g.addColorStop(0, 'rgba(16,185,129,0.06)'); g.addColorStop(1, 'rgba(16,185,129,0.01)'); }
+    return g;
+  }
+
+  /* =========================
+     Export: CSV & PDF
+     ========================= */
+  function exportCSV(){
+    // CSV includes monthly breakdown for all branches for 2024 & 2025
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    let csv = 'Branch,Year,' + months.join(',') + ',Total\n';
+    RAW.rows.forEach(r=>{
+      const br = r[0];
+      const m = monthlyMap[br];
+      csv += `${br},2024,` + m.m24.join(',') + ',' + r[2] + '\n';
+      csv += `${br},2025,` + m.m25.join(',') + ',' + r[1] + '\n';
+    });
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `crispy_chicken_export_${new Date().toISOString().slice(0,10)}.csv`;
+    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  }
+
+  async function exportPDF(){
+    // capture dashboard element and produce PDF with two pages: overview image + table text
+    const dashboard = document.getElementById('dashboard');
+    // temporarily expand charts for better capture
+    const origWidth = dashboard.style.width;
+    dashboard.style.width = '1200px';
+    // capture
+    const canvas = await html2canvas(dashboard, {scale:1.6, backgroundColor: getComputedStyle(document.body).backgroundColor});
+    dashboard.style.width = origWidth;
+    const imgData = canvas.toDataURL('image/jpeg',0.9);
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('landscape', 'pt', 'a4');
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+    // add image scaled
+    pdf.addImage(imgData, 'JPEG', 12, 12, pdfWidth-24, (canvas.height * (pdfWidth-24) / canvas.width));
+    // add second page with CSV-like summary
+    pdf.addPage();
+    pdf.setFontSize(12);
+    pdf.text('Branch summary (2024 vs 2025)', 20, 30);
+    let y = 50;
+    RAW.rows.forEach(r=>{
+      const line = `${r[0]} — 2024: ${fmt(r[2])}, 2025: ${fmt(r[1])}, Growth: ${growth(r[2], r[1]).toFixed(1)}%`;
+      if(y > pdfHeight - 40){ pdf.addPage(); y = 40; }
+      pdf.text(line, 20, y);
+      y += 16;
+    });
+    pdf.save(`crispy_chicken_dashboard_${new Date().toISOString().slice(0,10)}.pdf`);
+  }
+
+  /* =========================
+     Theme toggle, reset, login
+     ========================= */
+  const themeToggle = document.getElementById('themeToggle');
+  themeToggle.onclick = ()=>{
+    const body = document.body;
+    const current = body.getAttribute('data-theme');
+    if(current === 'light'){ body.setAttribute('data-theme','dark'); themeToggle.textContent='☀️'; }
+    else { body.setAttribute('data-theme','light'); themeToggle.textContent='🌙'; }
+    // re-render charts to read new colors/background
+    renderCharts();
+  };
+
+  document.getElementById('resetBtn').onclick = ()=>{
+    branchSelect.value = branches[0];
+    yearSelect.value = 'all';
+    currentSort = {col:'2025 (AED)',dir:'desc'};
+    updateKPIs(); buildTable(); renderCharts();
+  };
+
+  // export buttons
+  document.getElementById('exportCsv').onclick = exportCSV;
+  document.getElementById('exportPdf').onclick = exportPDF;
+
+  // login demo: hide modal and show dashboard
+  document.getElementById('loginBtn').onclick = ()=>{
+    document.getElementById('loginModal').style.display = 'none';
+  };
+
+  // when branch selection changes
+  branchSelect.onchange = ()=>{
+    updateKPIs();
+    buildTable();
+    renderCharts();
+  };
+  yearSelect.onchange = ()=>{
+    // allow toggling datasets: for now, filter charts to only show selected year or both
+    const val = yearSelect.value;
+    if(val === '2024'){
+      // hide 2025 dataset in branchChart and trendChart
+      branchChart.data.datasets[0].hidden = false; // 2024
+      branchChart.data.datasets[1].hidden = true;  // 2025
+      trendChart.data.datasets[0].hidden = false;
+      trendChart.data.datasets[1].hidden = true;
+    } else if(val === '2025'){
+      branchChart.data.datasets[0].hidden = true;
+      branchChart.data.datasets[1].hidden = false;
+      trendChart.data.datasets[0].hidden = true;
+      trendChart.data.datasets[1].hidden = false;
+    } else {
+      branchChart.data.datasets[0].hidden = false;
+      branchChart.data.datasets[1].hidden = false;
+      trendChart.data.datasets[0].hidden = false;
+      trendChart.data.datasets[1].hidden = false;
+    }
+    branchChart.update();
+    trendChart.update();
+  };
+
+  /* =========================
+     INIT
+     ========================= */
+  updateKPIs();
+  buildTable();
+  renderCharts();
+
+  // small UX: click value to copy
+  document.body.addEventListener('click', e=>{
+    if(e.target && e.target.classList.contains('value')){
+      navigator.clipboard?.writeText(e.target.textContent).then(()=>{/* copied */});
+    }
+  });
+
+  // make header of perf table clickable even after render
+  perfTable.addEventListener('click', e=>{
+    if(e.target && e.target.tagName === 'TH'){
+      e.target.click(); // re-trigger
+    }
+  });
+
+  // initial UI polish
+  setTimeout(()=>document.body.style.opacity = 1, 100);
+  </script>
+</body>
+</html>
