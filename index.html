@@ -3,321 +3,230 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Crispy Chicken — Interactive Sales Dashboard (Light)</title>
+  <title>Crispy Chicken — Pro Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <style>
-    /* Clean, valid CSS variables in :root */
     :root {
-      --bg: #ffffff;
-      --card: #f8fafb;
-      --muted: #6b7280;
-      --accent-1: #a7f3d0;
-      --accent-2: #c7b8ff;
-      --accent-3: #ffd6a5;
-      --accent-4: #bfe3ff;
-      --accent-5: #ffc9de;
-      --glass: rgba(15, 23, 42, 0.03);
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --muted: #64748b;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --primary: #4f46e5;
     }
-
-    /* Basic reset and layout */
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: #0f172a;
-      font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
-
-    .container { max-width: 1200px; margin: 28px auto; padding: 20px; }
-    header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
-    h1 { font-size: 20px; margin: 0; }
-    .controls { display: flex; gap: 12px; align-items: center; }
-    select, button { padding: 8px 12px; border-radius: 8px; border: 1px solid #e6eef6; background: white; }
-
-    .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
-    .card { background: var(--card); padding: 14px; border-radius: 12px; box-shadow: 0 1px 0 rgba(15,23,42,0.02); }
-    .kpi { grid-column: span 3; }
-    .wide { grid-column: span 6; }
-    .full { grid-column: span 12; }
-    .kpi h3 { margin: 0; font-size: 12px; color: var(--muted); }
-    .kpi .value { font-size: 20px; font-weight: 600; margin-top: 8px; }
-    .trend { font-size: 13px; margin-top: 6px; }
-    .flex { display: flex; gap: 12px; align-items: center; }
-    .summary { display: flex; gap: 12px; align-items: center; }
-    .small { font-size: 12px; color: var(--muted); }
-    canvas { max-height: 360px; width: 100% !important; }
-    .channel-list { display: flex; flex-wrap: wrap; gap: 8px; }
-    .chip { background: var(--glass); padding: 6px 8px; border-radius: 999px; font-size: 12px; }
-    footer { margin-top: 16px; text-align: center; color: var(--muted); font-size: 13px; }
-
-    @media (max-width: 900px) {
-      .kpi { grid-column: span 6; }
-      .wide { grid-column: span 12; }
-    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);font-family:Inter}
+    .container{max-width:1300px;margin:auto;padding:20px}
+    header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+    h1{margin:0;font-size:22px;font-weight:700}
+    .controls{display:flex;gap:10px}
+    select,button{padding:8px 12px;border-radius:8px;border:1px solid #cbd5e1;background:white}
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
+    .card{background:var(--card);padding:16px;border-radius:14px;box-shadow:0 4px 10px rgba(0,0,0,0.05)}
+    .kpi{grid-column:span 3;border-left:6px solid var(--primary)}
+    .kpi h3{margin:0;font-size:13px;color:var(--muted)}
+    .kpi .value{font-size:26px;font-weight:700;margin-top:6px}
+    canvas{width:100%!important;max-height:360px}
+    table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px}
+    th,td{padding:8px;border-bottom:1px solid #e2e8f0;text-align:left}
+    .up{color:var(--success);font-weight:700}
+    .down{color:var(--danger);font-weight:700}
   </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <div>
-        <h1>Crispy Chicken — Sales Dashboard (Light)</h1>
-        <div class="small">Compare 2024 vs 2025 • Branch & channel drilldown</div>
-      </div>
-      <div class="controls">
-        <label class="small" for="branchSelect">Branch</label>
-        <select id="branchSelect" aria-label="Branch selector"></select>
-        <button id="resetBtn" type="button">Reset</button>
-        <button id="exportBtn" type="button">Export CSV</button>
-      </div>
-    </header>
+<div class="container">
 
-    <section class="grid">
-      <!-- KPIs -->
-      <div class="card kpi" id="kpiTotal2024">
-        <h3>Total Sales 2024</h3>
-        <div class="value" id="total2024">-</div>
-        <div class="small">By selected branch / All</div>
-      </div>
-      <div class="card kpi" id="kpiTotal2025">
-        <h3>Total Sales 2025</h3>
-        <div class="value" id="total2025">-</div>
-        <div class="small">By selected branch / All</div>
-      </div>
-      <div class="card kpi" id="kpiGrowth">
-        <h3>Growth %</h3>
-        <div class="value" id="growthPct">-</div>
-        <div class="small" id="growthNote">vs 2024</div>
-      </div>
-
-      <!-- Branch comparison chart -->
-      <div class="card wide">
-        <h3 style="margin-bottom:8px">Branch: 2024 vs 2025 (Totals)</h3>
-        <canvas id="branchBar"></canvas>
-      </div>
-
-      <!-- Monthly trends -->
-      <div class="card wide">
-        <h3 style="margin-bottom:8px">Monthly Trend (Jan–Oct)</h3>
-        <canvas id="monthlyLine"></canvas>
-      </div>
-
-      <!-- Channel breakdown -->
-      <div class="card full">
-        <h3 style="margin-bottom:8px">Channel Breakdown (Selected Branch)</h3>
-        <div class="flex" style="margin-bottom:12px">
-          <div class="small">Channels</div>
-          <div class="channel-list" id="channelChips"></div>
-        </div>
-        <canvas id="channelStacked"></canvas>
-      </div>
-
-      <!-- Summary cards -->
-      <div class="card wide">
-        <h3>Quick Summary</h3>
-        <div style="margin-top:10px" id="summaryCards"></div>
-      </div>
-
-      <div class="card wide">
-        <h3>Notes & Actions</h3>
-        <ul class="small">
-          <li>Use the branch selector to focus. 'All' aggregates every branch.</li>
-          <li>Charts are interactive: hover to see exact values.</li>
-          <li>Click Export CSV to download the currently selected dataset.</li>
-        </ul>
-      </div>
-
-    </section>
-
-    <footer>Generated dashboard — Clean Light Mode • Data from provided dataset</footer>
+<header>
+  <h1>Crispy Chicken — Professional Performance Dashboard</h1>
+  <div class="controls">
+    <select id="branchSelect"></select>
+    <select id="yearSelect">
+      <option value="all">2024 vs 2025</option>
+      <option value="2024">2024 Only</option>
+      <option value="2025">2025 Only</option>
+    </select>
+    <button id="resetBtn">Reset</button>
   </div>
+</header>
 
-  <!-- Load Chart.js from CDN (kept separate and before our script) -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<section class="grid">
+  <div class="card kpi"><h3>Total 2024</h3><div class="value" id="val2024">-</div></div>
+  <div class="card kpi"><h3>Total 2025</h3><div class="value" id="val2025">-</div></div>
+  <div class="card kpi"><h3>Growth %</h3><div class="value" id="growthVal">-</div></div>
+  <div class="card kpi"><h3>Best Branch</h3><div class="value" id="bestBranch">-</div></div>
 
-  <!-- Application script: wrapped and DOM-safe -->
-  <script>
-  (function () {
-    'use strict';
+  <div class="card" style="grid-column:span 12"><h3>Branch Comparison</h3><canvas id="branchChart"></canvas></div>
+  <div class="card" style="grid-column:span 12"><h3>Ranking Chart</h3><canvas id="rankChart"></canvas></div>
+  <div class="card" style="grid-column:span 12"><h3>Monthly Trend</h3><canvas id="trendChart"></canvas></div>
 
-    function domReady(fn) {
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', fn);
-      } else {
-        fn();
-      }
+  <div class="card" style="grid-column:span 12">
+    <h3>Branch Performance Table</h3>
+    <table id="perfTable"></table>
+  </div>
+</section>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+/* ==========================
+   RAW DATA
+========================== */
+const DATA = {
+  rows:[
+    ['Hamdan St',7444537,8297881],
+    ['Khaldia',6039662,6293740],
+    ['Shabiya 11',6510384,5502957],
+    ['Muroor',5125737,4767127],
+    ['Al Barsha',6257407,5753883],
+    ['Al Satwa',4774601,2631356],
+    ['Elctria',7637929,2830175],
+    ['Al Rigga',442475,0]
+  ]
+};
+
+const branches = DATA.rows.map(r=>r[0]);
+const totals25 = DATA.rows.map(r=>r[1]);
+const totals24 = DATA.rows.map(r=>r[2]);
+
+function fmt(n){return n.toLocaleString()}
+function growth(a,b){return ((b-a)/a)*100}
+
+/* ==========================
+   POPULATE SELECT
+========================== */
+const sel=document.getElementById('branchSelect');
+branches.forEach(b=>{
+  const o=document.createElement('option');
+  o.textContent=b;
+  sel.appendChild(o);
+});
+sel.value=branches[0];
+
+/* ==========================
+   UPDATE KPIs
+========================== */
+function updateKPIs(){
+  let idx=branches.indexOf(sel.value);
+  let t24=totals24[idx]; 
+  let t25=totals25[idx];
+
+  document.getElementById('val2024').textContent = fmt(t24);
+  document.getElementById('val2025').textContent = fmt(t25);
+
+  let g=growth(t24,t25);
+  document.getElementById('growthVal').textContent = 
+    (g>0?"🔼 ":"🔻 ") + g.toFixed(1) + "%";
+
+  // Best Branch
+  let maxIndex = totals25.indexOf(Math.max(...totals25));
+  document.getElementById('bestBranch').textContent = branches[maxIndex];
+}
+
+/* ==========================
+   TABLE
+========================== */
+function buildTable(){
+  let html = `
+    <tr>
+      <th>Branch</th>
+      <th>2024</th>
+      <th>2025</th>
+      <th>Growth %</th>
+    </tr>
+  `;
+
+  DATA.rows.forEach(row=>{
+    let g = growth(row[2], row[1]);
+    html+=`
+      <tr>
+        <td>${row[0]}</td>
+        <td>${fmt(row[2])}</td>
+        <td>${fmt(row[1])}</td>
+        <td class="${g>0?'up':'down'}">${g.toFixed(1)}%</td>
+      </tr>
+    `;
+  });
+
+  document.getElementById('perfTable').innerHTML = html;
+}
+
+/* ==========================
+   CHARTS
+========================== */
+let branchChart, rankChart, trendChart;
+
+function renderCharts(){
+  // Destroy if exists
+  if(branchChart) branchChart.destroy();
+  if(rankChart) rankChart.destroy();
+  if(trendChart) trendChart.destroy();
+
+  // Branch Comparison (bar)
+  branchChart = new Chart(document.getElementById("branchChart"),{
+    type:"bar",
+    data:{
+      labels:branches,
+      datasets:[
+        {label:"2024",data:totals24,backgroundColor:"#6366f1"},
+        {label:"2025",data:totals25,backgroundColor:"#10b981"}
+      ]
     }
+  });
 
-    domReady(function () {
-      // Data (embedded)
-      var DATA = {
-        months: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct'],
-        monthly2024: [3149650,2951532,2672523,3168222,3665044,4106213,3855478,3975836,4026113,4506508],
-        monthly2025: [4229949.74,4137314.91,3255914.40,4160183.10,4547728.40,4766683.46,4776431.60,4588791.00,4447282.47,5730046.85],
-        branches: [
-          {name:'All', totals2024:36077119, totals2025:43790257.44, channels:{}},
-          {name:'Hamdan St', totals2024:8297881, totals2025:7444537, channels:{'Selif Delivery':1326880,'Online Web':337791,'Noon':921626,'Careem':114142,'Smile':418980,'Deliveroo':97537,'Talabat':1019864,'Keeta':0,'Talabana':4752,'Other':4056309}},
-          {name:'Khaldia', totals2024:6293740, totals2025:6039662, channels:{'Selif Delivery':673137,'Online Web':193287,'Noon':828151,'Careem':95050,'Smile':243034,'Deliveroo':100185,'Talabat':1091298,'Keeta':0,'Talabana':8607,'Other':3060991}},
-          {name:'Shabiya 11', totals2024:5502957, totals2025:6510384, channels:{'Selif Delivery':578016,'Online Web':100568,'Noon':781361,'Careem':65129,'Smile':500450,'Deliveroo':43854,'Talabat':603309,'Keeta':0,'Talabana':0,'Other':2830270}},
-          {name:'Muroor', totals2024:4767127, totals2025:5125737, channels:{'Selif Delivery':604208,'Online Web':87023,'Noon':468515,'Careem':64580,'Smile':216136,'Deliveroo':45507,'Talabat':668358,'Keeta':0,'Talabana':5334,'Other':2607466}},
-          {name:'Elctria', totals2024:2830175, totals2025:7637929, channels:{'Selif Delivery':0,'Online Web':0,'Noon':381501,'Careem':21497,'Smile':114956,'Deliveroo':0,'Talabat':16268,'Keeta':0,'Talabana':0,'Other':2295953}},
-          {name:'Al Barsha', totals2024:5753883, totals2025:6257407, channels:{'Selif Delivery':455337,'Online Web':148375,'Noon':808082,'Careem':442207,'Smile':186627,'Deliveroo':71914,'Talabat':613353,'Keeta':0,'Talabana':18412,'Other':3009576}},
-          {name:'Al Satwa', totals2024:2631356, totals2025:4774601, channels:{'Selif Delivery':168430,'Online Web':45520,'Noon':289434,'Careem':147407,'Smile':0,'Deliveroo':8165,'Talabat':123450,'Keeta':0,'Talabana':7038,'Other':1841912}}
-        ]
-      };
+  // Ranking Chart (horizontal)
+  const sorted = [...DATA.rows].sort((a,b)=>b[1]-a[1]);
+  rankChart = new Chart(document.getElementById("rankChart"),{
+    type:"bar",
+    data:{
+      labels:sorted.map(r=>r[0]),
+      datasets:[{
+        label:"2025 Rank",
+        data:sorted.map(r=>r[1]),
+        backgroundColor:"#4f46e5"
+      }]
+    },
+    options:{indexAxis:"y"}
+  });
 
-      // Utilities
-      function fmt(v) {
-        if (v === 0) return '0';
-        var n = Number(v) || 0;
-        if (Math.abs(n) >= 1000000) return (n / 1000000).toFixed(2) + 'M';
-        if (Math.abs(n) >= 1000) return Math.round(n / 1000) + 'k';
-        return String(n);
-      }
+  // Monthly Trend (dummy data for now)
+  trendChart = new Chart(document.getElementById("trendChart"),{
+    type:"line",
+    data:{
+      labels:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
+      datasets:[{
+        label:"Trend",
+        data:[12,14,9,15,17,13,18,16,19,15,20,21],
+        borderColor:"#4f46e5",
+        tension:0.3
+      }]
+    }
+  });
+}
 
-      function pct(a, b) {
-        var denom = Math.abs(Number(a)) || 1;
-        return ((Number(b) - Number(a)) / denom) * 100;
-      }
+/* ==========================
+   RESET
+========================== */
+document.getElementById("resetBtn").onclick = ()=>{
+  sel.value = branches[0];
+  document.getElementById('yearSelect').value="all";
+  updateKPIs();
+  renderCharts();
+};
 
-      // DOM handles
-      var branchSelect = document.getElementById('branchSelect');
-      var total2024El = document.getElementById('total2024');
-      var total2025El = document.getElementById('total2025');
-      var growthPctEl = document.getElementById('growthPct');
-      var growthNoteEl = document.getElementById('growthNote');
-      var channelChips = document.getElementById('channelChips');
-      var summaryCards = document.getElementById('summaryCards');
+/* ==========================
+   INIT
+========================== */
+updateKPIs();
+buildTable();
+renderCharts();
 
-      // populate branches safely
-      for (var i = 0; i < DATA.branches.length; i++) {
-        var opt = document.createElement('option');
-        opt.value = i;
-        opt.textContent = DATA.branches[i].name;
-        branchSelect.appendChild(opt);
-      }
-      branchSelect.value = '0';
+/* When branch changes */
+sel.onchange = ()=>{
+  updateKPIs();
+  renderCharts();
+};
+</script>
 
-      // Chart holders
-      var branchBarChart = null;
-      var monthlyLineChart = null;
-      var channelChart = null;
-
-      function updateKPIs(branchIndex) {
-        var b = DATA.branches[branchIndex] || { totals2024: 0, totals2025: 0, name: 'All' };
-        var t24 = b.totals2024 || 0; var t25 = b.totals2025 || 0;
-        total2024El.textContent = fmt(t24);
-        total2025El.textContent = fmt(t25);
-        var change = pct(t24, t25);
-        var arrow = change > 0 ? '🔼 ' : '🔻 ';
-        growthPctEl.textContent = isFinite(change) ? (arrow + Math.abs(change).toFixed(1) + '%') : '-';
-        growthPctEl.style.color = change >= 0 ? '#059669' : '#ef4444';
-        growthNoteEl.textContent = 'vs 2024 • ' + b.name;
-      }
-
-      function renderBranchBar() {
-        var ctx = document.getElementById('branchBar').getContext('2d');
-        var labels = DATA.branches.slice(1).map(function (x) { return x.name; });
-        var d24 = DATA.branches.slice(1).map(function (x) { return x.totals2024 || 0; });
-        var d25 = DATA.branches.slice(1).map(function (x) { return x.totals2025 || 0; });
-        if (branchBarChart) { branchBarChart.destroy(); branchBarChart = null; }
-        branchBarChart = new Chart(ctx, {
-          type: 'bar',
-          data: { labels: labels, datasets: [ { label: '2024', data: d24, backgroundColor: 'rgba(196,223,255,0.9)' }, { label: '2025', data: d25, backgroundColor: 'rgba(199,184,255,0.9)' } ] },
-          options: { responsive: true, plugins: { legend: { position: 'top' } }, scales: { y: { ticks: { precision: 0 } } } }
-        });
-      }
-
-      function renderMonthlyLine() {
-        var ctx = document.getElementById('monthlyLine').getContext('2d');
-        if (monthlyLineChart) { monthlyLineChart.destroy(); monthlyLineChart = null; }
-        monthlyLineChart = new Chart(ctx, {
-          type: 'line',
-          data: { labels: DATA.months, datasets: [ { label: '2024', data: DATA.monthly2024, fill: false, borderWidth: 2, tension: 0.3 }, { label: '2025', data: DATA.monthly2025, fill: false, borderWidth: 2, tension: 0.3 } ] },
-          options: { responsive: true, plugins: { legend: { position: 'top' } }, scales: { y: { ticks: { precision: 0 } } } }
-        });
-      }
-
-      function renderChannelChart(branchIndex) {
-        var b = DATA.branches[branchIndex] || { channels: {} };
-        var labels = Object.keys(b.channels || {});
-        var values = labels.map(function (k) { return b.channels[k] || 0; });
-
-        if (channelChart) { channelChart.destroy(); channelChart = null; }
-        var ctx = document.getElementById('channelStacked').getContext('2d');
-        var palette = ['rgba(191,227,255,0.9)','rgba(199,184,255,0.9)','rgba(255,214,165,0.9)','rgba(167,243,208,0.9)','rgba(255,201,222,0.9)','rgba(214,245,229,0.9)','rgba(239,237,255,0.9)','rgba(255,238,238,0.9)','rgba(238,245,255,0.9)','rgba(245,245,245,0.9)'];
-        var bg = labels.map(function (_, i) { return palette[i % palette.length]; });
-
-        channelChart = new Chart(ctx, {
-          type: 'bar',
-          data: { labels: labels, datasets: [ { label: b.name + ' (2025 channel totals)', data: values, backgroundColor: bg } ] },
-          options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { stacked: false, ticks: { precision: 0 } } } }
-        });
-
-        // chips
-        channelChips.innerHTML = '';
-        for (var i = 0; i < labels.length; i++) {
-          var c = document.createElement('div'); c.className = 'chip'; c.textContent = labels[i] + ': ' + fmt(values[i]); channelChips.appendChild(c);
-        }
-      }
-
-      function updateSummary(branchIndex) {
-        var b = DATA.branches[branchIndex] || { channels: {} };
-        summaryCards.innerHTML = '';
-        var channelsArr = Object.keys(b.channels || {}).map(function (k) { return [k, b.channels[k]]; });
-        channelsArr.sort(function (a, b) { return b[1] - a[1]; });
-        var best = channelsArr.length ? channelsArr[0] : null;
-        var worst = channelsArr.length ? channelsArr[channelsArr.length - 1] : null;
-
-        var branchLine = document.createElement('div'); branchLine.className = 'small'; branchLine.innerHTML = '<strong>Branch:</strong> ' + (b.name || 'All');
-        var topLine = document.createElement('div'); topLine.className = 'small'; topLine.style.marginTop = '8px';
-        topLine.innerHTML = '<strong>Top channel:</strong> ' + (best ? (best[0] + ' (' + fmt(best[1]) + ')') : 'N/A');
-        var lowLine = document.createElement('div'); lowLine.className = 'small'; lowLine.style.marginTop = '6px';
-        lowLine.innerHTML = '<strong>Lowest channel:</strong> ' + (worst ? (worst[0] + ' (' + fmt(worst[1]) + ')') : 'N/A');
-        var peakLine = document.createElement('div'); peakLine.className = 'small'; peakLine.style.marginTop = '6px';
-        var peakVal = Math.max.apply(null, DATA.monthly2025.slice());
-        var peakIdx = DATA.monthly2025.indexOf(peakVal);
-        peakLine.innerHTML = '<strong>Monthly peak 2025:</strong> ' + (DATA.months[peakIdx] || '-') + ' (' + fmt(peakVal) + ')';
-
-        summaryCards.appendChild(branchLine);
-        summaryCards.appendChild(topLine);
-        summaryCards.appendChild(lowLine);
-        summaryCards.appendChild(peakLine);
-      }
-
-      function renderAll(branchIndex) {
-        updateKPIs(branchIndex);
-        renderChannelChart(branchIndex);
-        updateSummary(branchIndex);
-      }
-
-      // events
-      branchSelect.addEventListener('change', function (ev) { renderAll(Number(ev.target.value)); });
-      document.getElementById('resetBtn').addEventListener('click', function () { branchSelect.value = '0'; renderAll(0); });
-
-      document.getElementById('exportBtn').addEventListener('click', function () {
-        var idx = Number(branchSelect.value) || 0; var b = DATA.branches[idx] || { name: 'All', channels: {} };
-        var rows = [];
-        rows.push(['Branch', b.name]);
-        rows.push(['Total 2024', b.totals2024 || 0]);
-        rows.push(['Total 2025', b.totals2025 || 0]);
-        rows.push([]);
-        rows.push(['Channel', 'Value (2025)']);
-        Object.keys(b.channels || {}).forEach(function (k) { rows.push([k, b.channels[k]]); });
-        var csv = rows.map(function (r) { return r.map(function (c) { return (typeof c === 'string' && c.indexOf(',') !== -1) ? ('"' + c + '"') : String(c); }).join(','); }).join('\n');
-        var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        var url = URL.createObjectURL(blob);
-        var a = document.createElement('a'); a.href = url; a.download = 'dashboard_export_' + (b.name || 'export').replace(/\s+/g, '_') + '.csv'; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-      });
-
-      // initial render
-      renderBranchBar();
-      renderMonthlyLine();
-      renderAll(0);
-    });
-  })();
-  </script>
 </body>
 </html>
