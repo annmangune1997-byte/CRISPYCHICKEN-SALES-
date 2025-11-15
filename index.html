@@ -119,6 +119,99 @@
     
     .loading{display:inline-block;width:20px;height:20px;border:3px solid rgba(255,255,255,0.3);border-radius:50%;border-top-color:white;animation:spin 1s ease-in-out infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
+    
+    /* Add Data Form Styles */
+    .add-data-section {
+      margin-top: 30px;
+      padding: 20px;
+      background: var(--accent);
+      border-radius: 12px;
+    }
+    
+    .add-data-section h3 {
+      margin-top: 0;
+      margin-bottom: 20px;
+      color: var(--primary);
+    }
+    
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    
+    .form-group label {
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--muted);
+    }
+    
+    .form-group input,
+    .form-group select {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      background: var(--card);
+      color: inherit;
+      font-size: 14px;
+    }
+    
+    .form-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+    
+    .btn-secondary {
+      background: transparent;
+      color: var(--primary);
+      border: 1px solid var(--primary);
+    }
+    
+    .btn-secondary:hover {
+      background: var(--primary);
+      color: white;
+    }
+    
+    .data-preview {
+      margin-top: 20px;
+      padding: 15px;
+      background: var(--card);
+      border-radius: 8px;
+      border: 1px solid #e6edf3;
+    }
+    
+    .data-preview h4 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      color: var(--primary);
+    }
+    
+    .preview-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #e6edf3;
+    }
+    
+    .preview-item:last-child {
+      border-bottom: none;
+    }
+    
+    .preview-label {
+      font-weight: 600;
+    }
+    
+    .preview-value {
+      color: var(--primary);
+    }
   </style>
 </head>
 <body data-theme="light">
@@ -290,6 +383,106 @@
         </div>
       </div>
     </section>
+
+    <!-- Add New Data Section -->
+    <div class="add-data-section">
+      <h3><i class="fas fa-plus-circle"></i> Add New Data</h3>
+      <form id="addDataForm">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="newMonth">Month</label>
+            <select id="newMonth" required>
+              <option value="">Select Month</option>
+              <option value="Jan">January</option>
+              <option value="Feb">February</option>
+              <option value="Mar">March</option>
+              <option value="Apr">April</option>
+              <option value="May">May</option>
+              <option value="Jun">June</option>
+              <option value="Jul">July</option>
+              <option value="Aug">August</option>
+              <option value="Sep">September</option>
+              <option value="Oct">October</option>
+              <option value="Nov">November</option>
+              <option value="Dec">December</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="newBranch">Branch</label>
+            <input type="text" id="newBranch" placeholder="Enter branch name" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="newChannel">Channel</label>
+            <select id="newChannel" required>
+              <option value="">Select Channel</option>
+              <option value="Self Delivery">Self Delivery</option>
+              <option value="Online Web">Online Web</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="newS24">Sales 2024 (AED)</label>
+            <input type="number" id="newS24" placeholder="0" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="newS25">Sales 2025 (AED)</label>
+            <input type="number" id="newS25" placeholder="0" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="newO24">Orders 2024</label>
+            <input type="number" id="newO24" placeholder="0" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="newO25">Orders 2025</label>
+            <input type="number" id="newO25" placeholder="0" required>
+          </div>
+        </div>
+        
+        <div class="data-preview" id="dataPreview" style="display: none;">
+          <h4>Data Preview</h4>
+          <div class="preview-item">
+            <span class="preview-label">Branch:</span>
+            <span class="preview-value" id="previewBranch">-</span>
+          </div>
+          <div class="preview-item">
+            <span class="preview-label">Month:</span>
+            <span class="preview-value" id="previewMonth">-</span>
+          </div>
+          <div class="preview-item">
+            <span class="preview-label">Channel:</span>
+            <span class="preview-value" id="previewChannel">-</span>
+          </div>
+          <div class="preview-item">
+            <span class="preview-label">Sales 2024:</span>
+            <span class="preview-value" id="previewS24">-</span>
+          </div>
+          <div class="preview-item">
+            <span class="preview-label">Sales 2025:</span>
+            <span class="preview-value" id="previewS25">-</span>
+          </div>
+          <div class="preview-item">
+            <span class="preview-label">Orders 2024:</span>
+            <span class="preview-value" id="previewO24">-</span>
+          </div>
+          <div class="preview-item">
+            <span class="preview-label">Orders 2025:</span>
+            <span class="preview-value" id="previewO25">-</span>
+          </div>
+        </div>
+        
+        <div class="form-actions">
+          <button type="button" id="previewBtn" class="btn-secondary">Preview</button>
+          <button type="submit" id="addDataBtn" class="btn-primary">
+            <i class="fas fa-plus"></i> Add Data
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
 
   <!-- Notification -->
@@ -1301,6 +1494,105 @@
       notification.classList.remove('show');
     }, 3000);
   }
+
+  /* =========================
+     Add New Data Functionality
+     ========================= */
+  // Preview button
+  document.getElementById('previewBtn').addEventListener('click', function() {
+    const month = document.getElementById('newMonth').value;
+    const branch = document.getElementById('newBranch').value;
+    const channel = document.getElementById('newChannel').value;
+    const s24 = document.getElementById('newS24').value;
+    const s25 = document.getElementById('newS25').value;
+    const o24 = document.getElementById('newO24').value;
+    const o25 = document.getElementById('newO25').value;
+    
+    // Check if all fields are filled
+    if (!month || !branch || !channel || !s24 || !s25 || !o24 || !o25) {
+      showNotification('Please fill all fields before previewing');
+      return;
+    }
+    
+    // Update preview
+    document.getElementById('previewBranch').textContent = branch;
+    document.getElementById('previewMonth').textContent = month;
+    document.getElementById('previewChannel').textContent = channel;
+    document.getElementById('previewS24').textContent = fmt(s24) + ' AED';
+    document.getElementById('previewS25').textContent = fmt(s25) + ' AED';
+    document.getElementById('previewO24').textContent = fmt(o24);
+    document.getElementById('previewO25').textContent = fmt(o25);
+    
+    // Show preview
+    document.getElementById('dataPreview').style.display = 'block';
+  });
+
+  // Add data form submission
+  document.getElementById('addDataForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Get form values
+    const month = document.getElementById('newMonth').value;
+    const branch = document.getElementById('newBranch').value;
+    const channel = document.getElementById('newChannel').value;
+    const s24 = parseFloat(document.getElementById('newS24').value);
+    const s25 = parseFloat(document.getElementById('newS25').value);
+    const o24 = parseInt(document.getElementById('newO24').value);
+    const o25 = parseInt(document.getElementById('newO25').value);
+    
+    // Validate inputs
+    if (!month || !branch || !channel || isNaN(s24) || isNaN(s25) || isNaN(o24) || isNaN(o25)) {
+      showNotification('Please fill all fields with valid values');
+      return;
+    }
+    
+    // Add new data to RAW.rows
+    const newBranchData = [branch, s25, s24];
+    RAW.rows.push(newBranchData);
+    
+    // Update branches array
+    if (!branches.includes(branch)) {
+      branches.push(branch);
+      
+      // Update branch select
+      const option = document.createElement('option');
+      option.value = branch;
+      option.textContent = branch;
+      branchSelect.appendChild(option);
+      
+      // Update comparison selects
+      const option1 = document.createElement('option');
+      option1.value = branch;
+      option1.textContent = branch;
+      compareBranch1.appendChild(option1);
+      
+      const option2 = document.createElement('option');
+      option2.value = branch;
+      option2.textContent = branch;
+      compareBranch2.appendChild(option2);
+    }
+    
+    // Update totals arrays
+    totals25.push(s25);
+    totals24.push(s24);
+    
+    // Generate monthly data for the new branch
+    const monthlyData = buildMonthlyFor(branch, s25, s24);
+    monthlyMap[branch] = monthlyData;
+    
+    // Update dashboard
+    updateKPIs();
+    buildTable();
+    renderCharts();
+    displayInsights();
+    
+    // Reset form
+    document.getElementById('addDataForm').reset();
+    document.getElementById('dataPreview').style.display = 'none';
+    
+    // Show success notification
+    showNotification(`Data added successfully for ${branch}!`);
+  });
 
   /* =========================
      INIT
